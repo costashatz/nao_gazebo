@@ -100,17 +100,17 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
     ROS_WARN("No port element present. Using default: [%d]", naoqi_port_);
   }
 
-  // Check for ModelType element
+  // Check for modelType element
   naoqi_model_type_ = "NAO_H25_V40";
-  if(_sdf->HasElement("ModelType"))
+  if(_sdf->HasElement("modelType"))
   {
-    naoqi_model_type_ = _sdf->GetElement("ModelType")->Get<string>();
+    naoqi_model_type_ = _sdf->GetElement("modelType")->Get<string>();
   }
 
   // Load NAOqi model and start simulated NAOqi
   try
   {
-    naoqi_model_ = new Sim::Model("/home/costas/Workspaces/ros_hydro/catkin_ws/src/nao_gazebo/gazebo_naoqi_control/models/"+naoqi_model_type_+".xml");
+    naoqi_model_ = new Sim::Model(naoqi_sim_path_+"/share/alrobotmodel/models/"+naoqi_model_type_+".xml");
     naoqi_hal_ = new Sim::HALInterface(naoqi_model_, naoqi_port_);
     if(!naoqi_sim_launcher_->launch(naoqi_model_, naoqi_port_, naoqi_path_))
     {
@@ -120,7 +120,7 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   }
   catch(const std::exception& e)
   {
-    ROS_ERROR("Exception while launching HAL or NAOqi. GazeboNaoqiControlPlugin could not be loaded.\n\t\t%s", e.what());
+    ROS_ERROR("Exception while launching HAL or NAOqi. GazeboNaoqiControlPlugin could not be loaded.\n\t%s", e.what());
     return;
   }
 
