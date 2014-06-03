@@ -6,7 +6,8 @@ project(gazebo_naoqi_control)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Tell Program where to find NAOqi bin
-add_definitions(-DNAOQI_SDK="$ENV{AL_SIM_DIR}")
+add_definitions(-DNAOQI_SDK="$ENV{AL_DIR}")
+add_definitions(-DNAOQI_SIM_SDK="$ENV{AL_SIM_DIR}")
 
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS 

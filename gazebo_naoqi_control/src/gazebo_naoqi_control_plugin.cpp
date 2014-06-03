@@ -28,7 +28,8 @@ GazeboNaoqiControlPlugin::GazeboNaoqiControlPlugin()
 {
   naoqi_sim_launcher_ = new Sim::NAOqiLauncher();
 
-  naoqi_path_ = "/home/costas/Workspaces/nao/devtools/naoqi-sdk-1.14.5-linux64";
+  naoqi_path_ = NAOQI_SDK;
+  naoqi_sim_path_ = NAOQI_SIM_SDK;
 }
 
 GazeboNaoqiControlPlugin::~GazeboNaoqiControlPlugin()
@@ -47,7 +48,6 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
 {
   model_ = _parent;
 
-
   // Error message if the model couldn't be found
   if (!model_)
   {
@@ -61,36 +61,6 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
     ROS_ERROR("A ROS node for Gazebo has not been initialized, unable to load plugin.");
     return;
   }
-
-  // Check for robotNamespace element
-  if(_sdf->HasElement("robotNamespace"))
-  {
-    robot_namespace_ = _sdf->GetElement("robotNamespace")->Get<string>();
-  }
-  else
-  {
-    robot_namespace_ = model_->GetName(); // default
-  }
-
-  // Check for robotParam element
-  if (_sdf->HasElement("robotParam"))
-  {
-    robot_description_ = _sdf->GetElement("robotParam")->Get<string>();
-  }
-  else
-  {
-    robot_description_ = "robot_description"; // default
-  }
-
-  // // Check for robotSimType element
-  // if(_sdf->HasElement("robotSimType"))
-  // {
-  //   robot_hw_sim_type_str_ = _sdf->Get<string>("robotSimType");
-  // }
-  // else
-  // {
-  //   robot_hw_sim_type_str_ = "gazebo_ros_control/DefaultRobotHWSim";
-  // }
 
   // Get Gazebo World pointer
   world_ = model_->GetWorld();
@@ -137,83 +107,48 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
     naoqi_model_type_ = _sdf->GetElement("ModelType")->Get<string>();
   }
 
-  // // Node handle
-  // model_node_handle_ = ros::NodeHandle(robot_namespace_);
-
-  // // Get URDF string
-  // const string urdf_string = getURDF(robot_description_);
-  // if (!parseTransmissionsFromURDF(urdf_string))
-  // {
-  //   ROS_ERROR("Error parsing URDF. GazeboNaoqiControlPlugin could not be loaded.");
-  //   return;
-  // }
-
-  // // Load the RobotHWSim abstraction to interface the controllers with the gazebo model
-  // try
-  // {
-  //   robot_hw_sim_loader_.reset
-  //     (new pluginlib::ClassLoader<gazebo_ros_control::RobotHWSim>
-  //       ("gazebo_ros_control",
-  //         "gazebo_ros_control::RobotHWSim"));
-
-  //   robot_hw_sim_ = robot_hw_sim_loader_->createInstance(robot_hw_sim_type_str_);
-  //   urdf::Model urdf_model;
-  //   const urdf::Model *const urdf_model_ptr = urdf_model.initString(urdf_string) ? &urdf_model : NULL;
-
-  //   if(!robot_hw_sim_->initSim(robot_namespace_, model_node_handle_, model_, urdf_model_ptr, transmissions_))
-  //   {
-  //     ROS_ERROR("Could not initialize robot simulation interface. GazeboNaoqiControlPlugin could not be loaded.");
-  //     return;
-  //   }
-
-    // Load NAOqi model and start simulated NAOqi
-    try
+  // Load NAOqi model and start simulated NAOqi
+  try
+  {
+    naoqi_model_ = new Sim::Model("/home/costas/Workspaces/ros_hydro/catkin_ws/src/nao_gazebo/gazebo_naoqi_control/models/"+naoqi_model_type_+".xml");
+    naoqi_hal_ = new Sim::HALInterface(naoqi_model_, naoqi_port_);
+    if(!naoqi_sim_launcher_->launch(naoqi_model_, naoqi_port_, naoqi_path_))
     {
-      naoqi_model_ = new Sim::Model("/home/costas/Workspaces/ros_hydro/catkin_ws/src/nao_gazebo/gazebo_naoqi_control/models/"+naoqi_model_type_+".xml");
-      naoqi_hal_ = new Sim::HALInterface(naoqi_model_, naoqi_port_);
-      if(!naoqi_sim_launcher_->launch(naoqi_model_, naoqi_port_, naoqi_path_))
-      {
-        ROS_ERROR("Failed to Launch HAL or NAOqi. GazeboNaoqiControlPlugin could not be loaded.");
-        return;
-      }
-      ROS_INFO("Teleio");
-    }
-    catch(const std::exception& e)
-    {
-      ROS_ERROR("Exception while launching HAL or NAOqi. GazeboNaoqiControlPlugin could not be loaded.\n\t\t%s", e.what());
+      ROS_ERROR("Failed to Launch HAL or NAOqi. GazeboNaoqiControlPlugin could not be loaded.");
       return;
     }
+  }
+  catch(const std::exception& e)
+  {
+    ROS_ERROR("Exception while launching HAL or NAOqi. GazeboNaoqiControlPlugin could not be loaded.\n\t\t%s", e.what());
+    return;
+  }
 
-    ROS_INFO("JOINT READING");
-    // Get actuators/sensors from NAOqi
-    joints_ = naoqi_model_->joints();
-    for(unsigned int i=0;i<joints_.size();i++)
+  // Get actuators/sensors from NAOqi
+  joints_ = naoqi_model_->joints();
+  for(unsigned int i=0;i<joints_.size();i++)
+  {
+    string name = joints_[i]->name();
+    physics::JointPtr joint = model_->GetJoint(name);
+    if(joint)
     {
-      string name = joints_[i]->name();
+      gazebo_joints_.push_back(joint);
       joints_names_.push_back(name);
-      gazebo_joints_.push_back(model_->GetJoint(name));
     }
+  }
 
-    ROS_INFO("SENSROS");
-    angle_sensors_ = naoqi_model_->angleSensors();
-    torque_sensors_ = naoqi_model_->torqueSensors();
-    angle_speed_sensors_ = naoqi_model_->angleSpeedSensors();
+  angle_sensors_ = naoqi_model_->angleSensors();
+  torque_sensors_ = naoqi_model_->torqueSensors();
+  angle_speed_sensors_ = naoqi_model_->angleSpeedSensors();
 
-    ROS_INFO("ACTUATROS");
-    angle_actuators_ = naoqi_model_->angleActuators();
-    torque_actuators_ = naoqi_model_->torqueActuators();
-    angle_speed_actuators_ = naoqi_model_->angleSpeedActuators();
+  angle_actuators_ = naoqi_model_->angleActuators();
+  torque_actuators_ = naoqi_model_->torqueActuators();
+  angle_speed_actuators_ = naoqi_model_->angleSpeedActuators();
 
-    // Listen to the update event. This event is broadcast every
-    // simulation iteration.
-    update_connection_ = event::Events::ConnectWorldUpdateBegin(
-        boost::bind(&GazeboNaoqiControlPlugin::Update, this));
-
-  // }
-  // catch(pluginlib::LibraryLoadException &ex)
-  // {
-  //   ROS_FATAL_STREAM_NAMED("gazebo_ros_control","Failed to create robot simulation interface loader: "<<ex.what());
-  // }
+  // Listen to the update event. This event is broadcast every
+  // simulation iteration.
+  update_connection_ = event::Events::ConnectWorldUpdateBegin(
+      boost::bind(&GazeboNaoqiControlPlugin::Update, this));
 
   ROS_INFO("GazeboNaoqiControlPlugin loaded successfully!");
 }
@@ -244,42 +179,13 @@ void GazeboNaoqiControlPlugin::Update()
   last_write_sim_time_ros_ = sim_time_ros;
 }
 
-// Get the URDF XML from the parameter server
-string GazeboNaoqiControlPlugin::getURDF(string param_name) const
-{
-  string urdf_string;
-
-  // search and wait for robot_description on param server
-  while (urdf_string.empty())
-  {
-    string search_param_name;
-    if (model_node_handle_.searchParam(param_name, search_param_name))
-    {
-      model_node_handle_.getParam(search_param_name, urdf_string);
-    }
-    else
-    {
-      model_node_handle_.getParam(param_name, urdf_string);
-    }
-
-    usleep(100000);
-  }
-
-  return urdf_string;
-}
-
-// Get Transmissions from the URDF
-bool GazeboNaoqiControlPlugin::parseTransmissionsFromURDF(const string& urdf_string)
-{
-  //transmission_interface::TransmissionParser::parse(urdf_string, transmissions_);
-  return true;
-}
-
 void GazeboNaoqiControlPlugin::readSim(ros::Time time, ros::Duration period)
 {
   for(unsigned int i=0;i<gazebo_joints_.size();i++)
   {
-    naoqi_hal_->sendAngleSensorValue(angle_sensors_[i], gazebo_joints_[i]->GetAngle(0).Radian());
+    if(gazebo_joints_[i]->GetAngle(0).Radian()!=gazebo_joints_[i]->GetAngle(0).Radian())
+      continue;
+    naoqi_hal_->sendAngleSensorValue(naoqi_model_->angleSensor(joints_names_[i]), gazebo_joints_[i]->GetAngle(0).Radian());
   }
 }
 
@@ -287,8 +193,12 @@ void GazeboNaoqiControlPlugin::writeSim(ros::Time time, ros::Duration period)
 {
   for(unsigned int i=0;i<gazebo_joints_.size();i++)
   {
-    float effort = naoqi_hal_->fetchTorqueActuatorValue(torque_actuators_[i]);
-    gazebo_joints_[i]->SetForce(0,effort);
+    double angle = naoqi_hal_->fetchAngleActuatorValue(naoqi_model_->angleActuator(joints_names_[i]));
+    if(angle!=angle)
+    {
+      angle = naoqi_model_->angleActuator(joints_names_[i])->startValue();
+    }
+    gazebo_joints_[i]->SetAngle(0,math::Angle(angle));
   }
 }
 

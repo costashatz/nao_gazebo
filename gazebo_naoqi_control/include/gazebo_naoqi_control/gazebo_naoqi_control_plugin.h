@@ -63,9 +63,6 @@ namespace gazebo
       void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
       void Update();
 
-      string getURDF(string param_name) const;
-      bool parseTransmissionsFromURDF(const string& urdf_string);
-
       void readSim(ros::Time time, ros::Duration period);
       void writeSim(ros::Time time, ros::Duration period);
 
@@ -74,9 +71,8 @@ namespace gazebo
       Sim::NAOqiLauncher* naoqi_sim_launcher_;
       Sim::Model* naoqi_model_;
       Sim::HALInterface* naoqi_hal_;
-      string naoqi_path_, naoqi_model_type_, robot_namespace_, robot_description_;
+      string naoqi_path_, naoqi_sim_path_, naoqi_model_type_;
       int naoqi_port_;
-      ros::NodeHandle model_node_handle_;
       ros::Duration control_period_;
       ros::Time last_update_sim_time_ros_, last_write_sim_time_ros_;
 
@@ -92,12 +88,6 @@ namespace gazebo
       vector<const Sim::AngleSpeedActuator*> angle_speed_actuators_;
 
       vector<physics::JointPtr> gazebo_joints_;
-
-      // boost::shared_ptr<pluginlib::ClassLoader<gazebo_ros_control::RobotHWSim> > robot_hw_sim_loader_;
-      // string robot_hw_sim_type_str_;
-      // boost::shared_ptr<gazebo_ros_control::RobotHWSim> robot_hw_sim_;
-      // // Transmissions in this plugin's scope
-      // vector<transmission_interface::TransmissionInfo> transmissions_;
 
       // Pointer to the model
       physics::ModelPtr model_;
