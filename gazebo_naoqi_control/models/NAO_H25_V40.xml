@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ModulePreference name="aldebaran-robotics.com@Device_Head" xmlns="http://www.aldebaran-robotics.com/ns/ALPreference" schemaLocation="ModulePreference.xsd">
+    <Preference name="Key1" memoryName="RobotConfig/Head/HeadId" description="" value="0000" type="string" />
+    <Preference name="Key2" memoryName="RobotConfig/Head/Device/Camera/Version" description="" value="2" type="string" />
+    <Preference name="Key3" memoryName="RobotConfig/Head/BaseVersion" description="" value="V4.0" type="string" />
+    <Preference name="Key4" memoryName="RobotConfig/Head/Device/TouchBoard/Version" description="" value="1" type="string" />
+    <Preference name="Key5" memoryName="RobotConfig/Head/Device/FaceBoard/Leds/Rotation" description="" value="1" type="string" />
+    <Preference name="Key3" memoryName="RobotConfig/Body/BaseVersion" description="" value="V4.0" type="string" />
+    <Preference name="Key4" memoryName="RobotConfig/Body/Device/Hand/Left/Version" description="" value="4" type="string" /> <!-- 0 no hand, 3 hand V3.3 -->
+    <Preference name="Key5" memoryName="RobotConfig/Body/Device/Hand/Right/Version" description="" value="4" type="string" /> <!-- 0 no hand, 3 hand V3.3  -->
+    <Preference name="Key6" memoryName="RobotConfig/Body/Device/Foot/Version" description="" value="1" type="string" />
+    <Preference name="Key7" memoryName="RobotConfig/Body/Device/Legs/Version" description="" value="2" type="string" />
+    <Preference name="Key8" memoryName="RobotConfig/Body/Device/LeftArm/Version" description="" value="3" type="string" /> <!-- -1 no arm, 2 extended arm V3.3 -->
+    <Preference name="Key9" memoryName="RobotConfig/Body/Device/RightArm/Version" description="" value="3" type="string" /> <!-- -1 no arm, 2 extended arm V3.3 -->
+    <Preference name="Key10" memoryName="RobotConfig/Body/Version" description="" value="4.0.0" type="string" />
+    <Preference name="Key11" memoryName="RobotConfig/Body/Type" description="" value="Nao" type="string" />
+    <Preference name="Key12" memoryName="RobotConfig/Body/SoftwareRequirement" description="" value="1.12.0" type="string" />
+    <Preference name="Key1" memoryName="Device/DeviceList/ChestBoard/BodyNickName" description="" value="Nao0000" type="string" />
+    <Preference name="Key2" memoryName="Device/DeviceList/ChestBoard/BodyId" description="" value="00000ALDR1008E000000" type="string" />
+</ModulePreference>
