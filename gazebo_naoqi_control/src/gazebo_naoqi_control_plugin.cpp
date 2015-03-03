@@ -69,7 +69,14 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
 
   // Get the Gazebo simulation period
   ros::Duration gazebo_period(world_->GetPhysicsEngine()->GetMaxStepSize());
-  world_->GetPhysicsEngine()->SetGravity(gazebo::math::Vector3(0,0,0));
+  // world_->GetPhysicsEngine()->SetGravity(gazebo::math::Vector3(0,0,0));
+
+  // Check for robot namespace
+  robot_namespace_ = "/";
+  if(_sdf->HasElement("robotNamespace"))
+  {
+    robot_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
+  }
 
   // Check for controlPeriod element
   if(_sdf->HasElement("controlPeriod"))
@@ -107,7 +114,7 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   naoqi_model_type_ = "NAOH25V40";
   if(_sdf->HasElement("modelType"))
   {
-    naoqi_model_type_ = _sdf->GetElement("modelType")->Get<string>();
+    naoqi_model_type_ = _sdf->GetElement("modelType")->Get<std::string>();
   }
 
   // Load NAOqi model and start simulated NAOqi
@@ -128,37 +135,27 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   }
 
   // Get actuators/sensors from NAOqi
-
   angle_sensors_ = naoqi_model_->angleSensors();
-  // torque_sensors_ = naoqi_model_->torqueSensors();
-  // angle_speed_sensors_ = naoqi_model_->angleSpeedSensors();
 
   angle_actuators_ = naoqi_model_->angleActuators();
-  // torque_actuators_ = naoqi_model_->torqueActuators();
-  // angle_speed_actuators_ = naoqi_model_->angleSpeedActuators();
 
   joints_ = naoqi_model_->joints();
-  pid_controllers_.resize(angle_actuators_.size());
   for(unsigned int i=0;i<angle_actuators_.size();i++)
   {
-    string name = angle_actuators_[i]->name();
+    std::string name = angle_actuators_[i]->name();
     physics::JointPtr joint = model_->GetJoint(name);
     if(joint)
     {
       gazebo_joints_.push_back(joint);
       joints_names_.push_back(name);
-      // pid_controllers_[i].setGains(1000.0, 100.0, 1.0, 0.0, 0.0);
-      // pid_controllers_[i] = control_toolbox::Pid(100.0, 0.01, 10.0);
-      gazebo_joints_[i]->SetMaxForce(0, 3.0);
-      // ros::NodeHandle nh("nao_dcm/gazebo_ros_control/pid_gains/"+name);
-      //  const ros::NodeHandle nh(model_nh, std::string("nao_dcm/gazebo_ros_control/pid_gains/")+name);
-       // if(pid_controllers_[i].init(nh))
-      //  {
-      //    double p, i, d, i_max, i_min;
-      //    ROS_INFO("Let's see: %s", name.c_str());
-      //    pid_controllers_[i].getGains(p,i,d,i_max,i_min);
-      //    ROS_INFO("%f, %f, %f", p, i, d);
-      // }
+      const ros::NodeHandle nh(model_nh, std::string(robot_namespace_+"/gazebo_ros_control/pid_gains/")+name);
+      double p, i,d ;
+      // TO-DO: include i_clamp e.t.c.
+      nh.param("p", p, 0.0);
+      nh.param("i", i, 0.0);
+      nh.param("d", d, 0.0);
+
+      pid_controllers_.push_back(control_toolbox::Pid(p, i, d));
     }
   }
 
@@ -183,15 +180,10 @@ void GazeboNaoqiControlPlugin::Update()
     last_update_sim_time_ros_ = sim_time_ros;
 
     // Update the robot simulation with the state of the gazebo model
-    //robot_hw_sim_->readSim(sim_time_ros, sim_period);
     readSim(sim_time_ros, sim_period);
-    // Compute the controller commands
-    
   }
 
-  // Update the gazebo model with the result of the controller
-  // computation
-  //robot_hw_sim_->writeSim(sim_time_ros, sim_time_ros - last_write_sim_time_ros_);
+  // Update the gazebo model with commands from NAOqi
   writeSim(sim_time_ros, sim_time_ros - last_write_sim_time_ros_);
   last_write_sim_time_ros_ = sim_time_ros;
 }
@@ -224,13 +216,12 @@ void GazeboNaoqiControlPlugin::writeSim(ros::Time time, ros::Duration period)
     {
       angle = naoqi_model_->angleActuator(joints_names_[i])->startValue();
     }
-    // double a = gazebo_joints_[i]->GetAngle(0).Radian();
-    // if(a!=a)
-    //   a = angle;
-    // double error = angles::shortest_angular_distance(math::Angle(angle).Radian(), math::Angle(a).Radian());
-    // double effort = gazebo::math::clamp(pid_controllers_[i].computeCommand(error, period), -2.0, 2.0);
-    // gazebo_joints_[i]->SetForce(0, effort);
-    gazebo_joints_[i]->SetAngle(0,math::Angle(angle));
+    double a = gazebo_joints_[i]->GetAngle(0).Radian();
+    if(a!=a)
+      a = angle;
+    double error = angle-a;
+    double effort = gazebo::math::clamp(pid_controllers_[i].computeCommand(error, period), -2.0, 2.0);
+    gazebo_joints_[i]->SetForce(0, effort);
   }
 }
 

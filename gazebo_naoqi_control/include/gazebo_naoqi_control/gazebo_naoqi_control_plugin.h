@@ -50,9 +50,6 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 
 #include <vector>
 
-using std::vector;
-using std::string;
-
 namespace gazebo
 {
   class GazeboNaoqiControlPlugin : public ModelPlugin
@@ -72,24 +69,21 @@ namespace gazebo
       Sim::SimLauncher* naoqi_sim_launcher_;
       Sim::Model* naoqi_model_;
       Sim::HALInterface* naoqi_hal_;
-      string naoqi_path_, naoqi_sim_path_, naoqi_model_type_;
+      std::string naoqi_path_, naoqi_sim_path_, naoqi_model_type_;
+      std::string robot_namespace_;
       int naoqi_port_;
       ros::Duration control_period_;
       ros::Time last_update_sim_time_ros_, last_write_sim_time_ros_;
 
-      vector<string> joints_names_;
-      vector<const Sim::Joint*> joints_;
+      std::vector<std::string> joints_names_;
+      std::vector<const Sim::Joint*> joints_;
 
-      vector<const Sim::AngleSensor*> angle_sensors_;
-      vector<const Sim::TorqueSensor*> torque_sensors_;
-      vector<const Sim::AngleSpeedSensor*> angle_speed_sensors_;
+      std::vector<const Sim::AngleSensor*> angle_sensors_;
 
-      vector<const Sim::AngleActuator*> angle_actuators_;
-      vector<const Sim::TorqueActuator*> torque_actuators_;
-      vector<const Sim::AngleSpeedActuator*> angle_speed_actuators_;
+      std::vector<const Sim::AngleActuator*> angle_actuators_;
 
-      vector<physics::JointPtr> gazebo_joints_;
-      vector<control_toolbox::Pid> pid_controllers_;
+      std::vector<physics::JointPtr> gazebo_joints_;
+      std::vector<control_toolbox::Pid> pid_controllers_;
 
       // Pointer to the model
       physics::ModelPtr model_;
