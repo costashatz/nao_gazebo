@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Load the URDF Model -->
+  <!-- <include file="$(find nao_description)/launch/upload_nao.launch" />   -->
+  <param name="robot_description" textfile="$(find gazebo_naoqi_control)/models/nao.urdf" />
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+  </include>
+<!-- <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find nao_gazebo_plugin)/worlds/naoFoot.world"/>
+    <arg name="paused" value="true"/>
+  </include> -->
+
+
+  <!-- Use PIDs?? -->
+
+  <arg name="use_pid" value="true"/>
+  <group if="$(arg use_pid)">
+    <rosparam file="$(find nao_gazebo_plugin)/config/gazebo_ros_control_params.yaml" command="load"/>
+  </group>
+  <!-- Spawn a robot into Gazebo -->
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x -0.5 -y 1 -z 0.535 -model naoH25V40" /> 
+
+</launch>

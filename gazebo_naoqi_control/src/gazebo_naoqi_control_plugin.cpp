@@ -21,12 +21,13 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 **/
 
 #include <gazebo_naoqi_control/gazebo_naoqi_control_plugin.h>
+#include <angles/angles.h>
 
 using namespace gazebo;
 
 GazeboNaoqiControlPlugin::GazeboNaoqiControlPlugin()
 {
-  naoqi_sim_launcher_ = new Sim::NAOqiLauncher();
+  naoqi_sim_launcher_ = new Sim::SimLauncher();
 
   naoqi_path_ = NAOQI_SDK;
   naoqi_sim_path_ = NAOQI_SIM_SDK;
@@ -46,6 +47,7 @@ GazeboNaoqiControlPlugin::~GazeboNaoqiControlPlugin()
 
 void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf )
 {
+  ros::NodeHandle model_nh;
   model_ = _parent;
 
   // Error message if the model couldn't be found
@@ -67,6 +69,7 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
 
   // Get the Gazebo simulation period
   ros::Duration gazebo_period(world_->GetPhysicsEngine()->GetMaxStepSize());
+  world_->GetPhysicsEngine()->SetGravity(gazebo::math::Vector3(0,0,0));
 
   // Check for controlPeriod element
   if(_sdf->HasElement("controlPeriod"))
@@ -101,7 +104,7 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   }
 
   // Check for modelType element
-  naoqi_model_type_ = "NAO_H25_V40";
+  naoqi_model_type_ = "NAOH25V40";
   if(_sdf->HasElement("modelType"))
   {
     naoqi_model_type_ = _sdf->GetElement("modelType")->Get<string>();
@@ -110,7 +113,7 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   // Load NAOqi model and start simulated NAOqi
   try
   {
-    naoqi_model_ = new Sim::Model(naoqi_sim_path_+"/share/alrobotmodel/models/"+naoqi_model_type_+".xml");
+    naoqi_model_ = new Sim::Model(naoqi_sim_path_+"share/alrobotmodel/models/"+naoqi_model_type_+".xml");
     naoqi_hal_ = new Sim::HALInterface(naoqi_model_, naoqi_port_);
     if(!naoqi_sim_launcher_->launch(naoqi_model_, naoqi_port_, naoqi_path_))
     {
@@ -125,25 +128,39 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   }
 
   // Get actuators/sensors from NAOqi
+
+  angle_sensors_ = naoqi_model_->angleSensors();
+  // torque_sensors_ = naoqi_model_->torqueSensors();
+  // angle_speed_sensors_ = naoqi_model_->angleSpeedSensors();
+
+  angle_actuators_ = naoqi_model_->angleActuators();
+  // torque_actuators_ = naoqi_model_->torqueActuators();
+  // angle_speed_actuators_ = naoqi_model_->angleSpeedActuators();
+
   joints_ = naoqi_model_->joints();
-  for(unsigned int i=0;i<joints_.size();i++)
+  pid_controllers_.resize(angle_actuators_.size());
+  for(unsigned int i=0;i<angle_actuators_.size();i++)
   {
-    string name = joints_[i]->name();
+    string name = angle_actuators_[i]->name();
     physics::JointPtr joint = model_->GetJoint(name);
     if(joint)
     {
       gazebo_joints_.push_back(joint);
       joints_names_.push_back(name);
+      // pid_controllers_[i].setGains(1000.0, 100.0, 1.0, 0.0, 0.0);
+      // pid_controllers_[i] = control_toolbox::Pid(100.0, 0.01, 10.0);
+      gazebo_joints_[i]->SetMaxForce(0, 3.0);
+      // ros::NodeHandle nh("nao_dcm/gazebo_ros_control/pid_gains/"+name);
+      //  const ros::NodeHandle nh(model_nh, std::string("nao_dcm/gazebo_ros_control/pid_gains/")+name);
+       // if(pid_controllers_[i].init(nh))
+      //  {
+      //    double p, i, d, i_max, i_min;
+      //    ROS_INFO("Let's see: %s", name.c_str());
+      //    pid_controllers_[i].getGains(p,i,d,i_max,i_min);
+      //    ROS_INFO("%f, %f, %f", p, i, d);
+      // }
     }
   }
-
-  angle_sensors_ = naoqi_model_->angleSensors();
-  torque_sensors_ = naoqi_model_->torqueSensors();
-  angle_speed_sensors_ = naoqi_model_->angleSpeedSensors();
-
-  angle_actuators_ = naoqi_model_->angleActuators();
-  torque_actuators_ = naoqi_model_->torqueActuators();
-  angle_speed_actuators_ = naoqi_model_->angleSpeedActuators();
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -183,9 +200,11 @@ void GazeboNaoqiControlPlugin::readSim(ros::Time time, ros::Duration period)
 {
   for(unsigned int i=0;i<gazebo_joints_.size();i++)
   {
-    if(gazebo_joints_[i]->GetAngle(0).Radian()!=gazebo_joints_[i]->GetAngle(0).Radian())
+    double angle = gazebo_joints_[i]->GetAngle(0).Radian();
+    if(angle!=angle)
       continue;
-    naoqi_hal_->sendAngleSensorValue(naoqi_model_->angleSensor(joints_names_[i]), gazebo_joints_[i]->GetAngle(0).Radian());
+    if(naoqi_model_->angleSensor(joints_names_[i])) //some are passive joints
+      naoqi_hal_->sendAngleSensorValue(naoqi_model_->angleSensor(joints_names_[i]), angle);
   }
 }
 
@@ -193,11 +212,24 @@ void GazeboNaoqiControlPlugin::writeSim(ros::Time time, ros::Duration period)
 {
   for(unsigned int i=0;i<gazebo_joints_.size();i++)
   {
+    if(!naoqi_model_->angleActuator(joints_names_[i]))
+    {
+       //some are passive joints
+      continue;
+    }
     double angle = naoqi_hal_->fetchAngleActuatorValue(naoqi_model_->angleActuator(joints_names_[i]));
+    if(joints_names_[i]=="RHipYawPitch")
+      angle = naoqi_hal_->fetchAngleActuatorValue(naoqi_model_->angleActuator("LHipYawPitch"));
     if(angle!=angle)
     {
       angle = naoqi_model_->angleActuator(joints_names_[i])->startValue();
     }
+    // double a = gazebo_joints_[i]->GetAngle(0).Radian();
+    // if(a!=a)
+    //   a = angle;
+    // double error = angles::shortest_angular_distance(math::Angle(angle).Radian(), math::Angle(a).Radian());
+    // double effort = gazebo::math::clamp(pid_controllers_[i].computeCommand(error, period), -2.0, 2.0);
+    // gazebo_joints_[i]->SetForce(0, effort);
     gazebo_joints_[i]->SetAngle(0,math::Angle(angle));
   }
 }

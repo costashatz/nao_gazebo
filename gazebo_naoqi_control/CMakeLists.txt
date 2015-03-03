@@ -13,6 +13,7 @@ add_definitions(-DNAOQI_SIM_SDK="$ENV{AL_SIM_DIR}")
 find_package(catkin REQUIRED COMPONENTS 
   roscpp 
   gazebo_ros 
+  control_toolbox
 )
 
 find_package(NAOqiSIM REQUIRED COMPONENTS 
@@ -38,5 +39,6 @@ target_link_libraries(gazebo_naoqi_control ${catkin_LIBRARIES} ${GAZEBO_LIBRARIE
 catkin_package(
   DEPENDS 
     roscpp 
-    gazebo_ros 
+    gazebo_ros
+    control_toolbox
 )

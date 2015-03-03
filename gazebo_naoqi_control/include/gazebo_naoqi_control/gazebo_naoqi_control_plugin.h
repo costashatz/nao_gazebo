@@ -40,12 +40,13 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 // ros_control
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <transmission_interface/transmission_parser.h>
+#include <control_toolbox/pid.h>
 
 // NAOqi includes
 #include <qi/os.hpp>
 #include <alnaosim/alnaosim.h>
 #include <alrobotmodel/alrobotmodel.h>
-#include <alsimutils/naoqi_launcher.h>
+#include <alsimutils/sim_launcher.h>
 
 #include <vector>
 
@@ -68,7 +69,7 @@ namespace gazebo
 
     private:
       // Parameters
-      Sim::NAOqiLauncher* naoqi_sim_launcher_;
+      Sim::SimLauncher* naoqi_sim_launcher_;
       Sim::Model* naoqi_model_;
       Sim::HALInterface* naoqi_hal_;
       string naoqi_path_, naoqi_sim_path_, naoqi_model_type_;
@@ -88,6 +89,7 @@ namespace gazebo
       vector<const Sim::AngleSpeedActuator*> angle_speed_actuators_;
 
       vector<physics::JointPtr> gazebo_joints_;
+      vector<control_toolbox::Pid> pid_controllers_;
 
       // Pointer to the model
       physics::ModelPtr model_;
