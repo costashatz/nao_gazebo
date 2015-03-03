@@ -159,6 +159,9 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
     }
   }
 
+  initSensors();
+
+
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
   update_connection_ = event::Events::ConnectWorldUpdateBegin(
@@ -167,8 +170,81 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   ROS_INFO("GazeboNaoqiControlPlugin loaded successfully!");
 }
 
+void GazeboNaoqiControlPlugin::initSensors()
+{
+  camera_sensors_ = naoqi_model_->cameraSensors();
+
+  inertial_sensors_ = naoqi_model_->inertialSensors();
+}
+
+void GazeboNaoqiControlPlugin::updateSensors()
+{
+  // Update Cameras
+  for(int i=0;i<camera_sensors_.size();i++)
+  {
+    sensors::CameraSensorPtr cam = (boost::dynamic_pointer_cast<sensors::CameraSensor>(sensors::SensorManager::Instance()->GetSensor(camera_sensors_[i]->name())));
+    if(cam)
+    {
+      int width = cam->GetImageWidth();
+      int height = cam->GetImageHeight();
+      unsigned char* tmp = new unsigned char[width*height];
+      tmp = (unsigned char*)cam->GetImageData();
+      int res;
+      if(width==80)
+        res = Sim::RES_80_60;
+      else if(width==160)
+        res = Sim::RES_160_120;
+      else if(width==320)
+        res = Sim::RES_320_240;
+      else if(width==640)
+        res = Sim::RES_640_480;
+      else if(width==1280)
+        res = Sim::RES_1280_960;
+      else
+        res = Sim::RES_UNKNOWN;
+      // int* buffer = new int[width*height];
+      // naoqi_hal_->cameraBufferSize(camera_sensors_[i], buffer, &width, &height);
+      int r = naoqi_hal_->cameraResolution(camera_sensors_[i]);
+      if(r!=res)
+      {
+        ROS_ERROR("Mismatch in dimensions: %d vs %d", res, r);
+        continue;
+      }
+      if(!tmp)
+      {
+        ROS_ERROR("NULL image");
+        continue;
+      }
+      naoqi_hal_->sendCameraSensorValue(camera_sensors_[i], tmp, (Sim::CameraResolution)res, Sim::COL_SPACE_RGB);
+    }
+  }
+
+  //Update IMU
+  if(inertial_sensors_.size()>=1)
+  {
+    sensors::ImuSensorPtr imu = (boost::dynamic_pointer_cast<sensors::ImuSensor>(sensors::SensorManager::Instance()->GetSensor("imu")));
+    math::Vector3 angle = imu->GetAngularVelocity();
+    math::Vector3 acc = imu->GetLinearAcceleration();
+    math::Quaternion gyro = imu->GetOrientation();
+
+    std::vector<float> vals;
+    // AngleX, AngleY, [AngleZ - not in V40], AccX, AccY, AccZ, GyroX, GyroY, [GyroZ - not in V40]
+
+    vals.push_back(angle[0]);
+    vals.push_back(angle[1]);
+    vals.push_back(acc[0]);
+    vals.push_back(acc[1]);
+    vals.push_back(acc[2]);
+    vals.push_back(gyro.GetPitch());
+    vals.push_back(gyro.GetRoll());
+
+    naoqi_hal_->sendInertialSensorValues(inertial_sensors_[0], vals);
+  }
+}
+
 void GazeboNaoqiControlPlugin::Update()
 {
+  updateSensors();
   // Get the simulation time and period
   gazebo::common::Time gz_time_now = world_->GetSimTime();
   ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);

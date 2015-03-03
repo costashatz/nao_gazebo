@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
   <!-- Load the URDF Model -->
-  <include file="$(find nao_description)/launch/upload_nao.launch" />  
-  <!-- <param name="robot_description" textfile="$(find gazebo_naoqi_control)/models/nao.urdf" /> -->
+  <!-- <include file="$(find nao_description)/launch/upload_nao.launch" />   -->
+  <param name="robot_description" textfile="$(find gazebo_naoqi_control)/models/nao.urdf" />
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="paused" value="true"/>

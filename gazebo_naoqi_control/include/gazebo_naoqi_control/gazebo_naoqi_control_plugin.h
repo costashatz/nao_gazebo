@@ -36,6 +36,7 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
+#include <gazebo/sensors/sensors.hh>
 
 // ros_control
 #include <gazebo_ros_control/robot_hw_sim.h>
@@ -45,6 +46,7 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 // NAOqi includes
 #include <qi/os.hpp>
 #include <alnaosim/alnaosim.h>
+#include <alnaosim/alnaosim_camera_definitions.h>
 #include <alrobotmodel/alrobotmodel.h>
 #include <alsimutils/sim_launcher.h>
 
@@ -64,26 +66,32 @@ namespace gazebo
       void readSim(ros::Time time, ros::Duration period);
       void writeSim(ros::Time time, ros::Duration period);
 
+      void initSensors();
+      void updateSensors();
+
     private:
-      // Parameters
+      // NAOqi Parameters
       Sim::SimLauncher* naoqi_sim_launcher_;
       Sim::Model* naoqi_model_;
       Sim::HALInterface* naoqi_hal_;
       std::string naoqi_path_, naoqi_sim_path_, naoqi_model_type_;
       std::string robot_namespace_;
       int naoqi_port_;
-      ros::Duration control_period_;
-      ros::Time last_update_sim_time_ros_, last_write_sim_time_ros_;
-
-      std::vector<std::string> joints_names_;
       std::vector<const Sim::Joint*> joints_;
 
       std::vector<const Sim::AngleSensor*> angle_sensors_;
 
       std::vector<const Sim::AngleActuator*> angle_actuators_;
 
-      std::vector<physics::JointPtr> gazebo_joints_;
+      std::vector<const Sim::CameraSensor*> camera_sensors_;
+
+      std::vector<const Sim::InertialSensor*> inertial_sensors_;
+
+      // ROS Parameters
       std::vector<control_toolbox::Pid> pid_controllers_;
+
+      // Gazebo joints/sensors
+      std::vector<physics::JointPtr> gazebo_joints_;
 
       // Pointer to the model
       physics::ModelPtr model_;
@@ -93,6 +101,12 @@ namespace gazebo
 
       // Pointer to the update event connection
       event::ConnectionPtr update_connection_;
+
+      // Gazebo/ROS Parameters
+      ros::Duration control_period_;
+      ros::Time last_update_sim_time_ros_, last_write_sim_time_ros_;
+
+      std::vector<std::string> joints_names_;
 
   };
 }
