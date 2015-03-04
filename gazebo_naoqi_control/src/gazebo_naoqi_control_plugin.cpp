@@ -172,13 +172,52 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
 
 void GazeboNaoqiControlPlugin::initSensors()
 {
+  // Activate Camera Sensors
   camera_sensors_ = naoqi_model_->cameraSensors();
+  for(int i=0;i<camera_sensors_.size();i++)
+  {
+    sensors::CameraSensorPtr cam = (boost::dynamic_pointer_cast<sensors::CameraSensor>(sensors::SensorManager::Instance()->GetSensor(camera_sensors_[i]->name())));
 
+    if(cam)
+    {
+      cam->SetActive(true);
+    }
+  }
+
+  // Activate IMU
   inertial_sensors_ = naoqi_model_->inertialSensors();
+  if(inertial_sensors_.size()>=1)
+  {
+    sensors::ImuSensorPtr imu = (boost::dynamic_pointer_cast<sensors::ImuSensor>(sensors::SensorManager::Instance()->GetSensor("imu")));
 
+    if(imu)
+    {
+      imu->SetActive(true);
+    }
+  }
+
+  // Activate FSRs
   fsr_sensors_ = naoqi_model_->fsrSensors();
+  for(int i=0;i<fsr_sensors_.size();i++)
+  {
+    sensors::ContactSensorPtr fsr = (boost::dynamic_pointer_cast<sensors::ContactSensor>(sensors::SensorManager::Instance()->GetSensor(fsr_sensors_[i]->name())));
 
+    if(fsr)
+    {
+      fsr->SetActive(true);
+    }
+  }
+
+  // Activate Sonars
   sonar_sensors_ = naoqi_model_->sonarSensors();
+  for(int i=0;i<sonar_sensors_.size();i++)
+  {
+    sensors::SonarSensorPtr sonar = (boost::dynamic_pointer_cast<sensors::SonarSensor>(sensors::SensorManager::Instance()->GetSensor(sonar_sensors_[i]->name())));
+    if(sonar)
+    {
+      sonar->SetActive(true);
+    }
+  }
 }
 
 void GazeboNaoqiControlPlugin::updateSensors()
@@ -225,22 +264,51 @@ void GazeboNaoqiControlPlugin::updateSensors()
   if(inertial_sensors_.size()>=1)
   {
     sensors::ImuSensorPtr imu = (boost::dynamic_pointer_cast<sensors::ImuSensor>(sensors::SensorManager::Instance()->GetSensor("imu")));
-    math::Vector3 angle = imu->GetAngularVelocity();
-    math::Vector3 acc = imu->GetLinearAcceleration();
-    math::Quaternion gyro = imu->GetOrientation();
 
-    std::vector<float> vals;
-    // AngleX, AngleY, [AngleZ - not in V40], AccX, AccY, AccZ, GyroX, GyroY, [GyroZ - not in V40]
+    if(imu)
+    {
+      math::Vector3 gyro = imu->GetAngularVelocity();
+      math::Vector3 acc = imu->GetLinearAcceleration();
+      math::Quaternion orient = imu->GetOrientation();
 
-    vals.push_back(angle[0]);
-    vals.push_back(angle[1]);
-    vals.push_back(acc[0]);
-    vals.push_back(acc[1]);
-    vals.push_back(acc[2]);
-    vals.push_back(gyro.GetRoll());
-    vals.push_back(gyro.GetPitch());
+      std::vector<float> vals;
+      // AngleX, AngleY, [AngleZ - not in V40], AccX, AccY, AccZ, GyroX, GyroY, [GyroZ - not in V40]
 
-    naoqi_hal_->sendInertialSensorValues(inertial_sensors_[0], vals);
+      vals.push_back(orient.GetRoll());
+      vals.push_back(orient.GetPitch());
+      vals.push_back(acc[0]);
+      vals.push_back(acc[1]);
+      vals.push_back(-acc[2]);
+      vals.push_back(gyro[0]);
+      vals.push_back(gyro[1]);
+
+      naoqi_hal_->sendInertialSensorValues(inertial_sensors_[0], vals);
+    }
+  }
+
+  math::Vector3 gravity = world_->GetPhysicsEngine()->GetGravity();
+
+  // Update FSRs
+  for(int i=0;i<fsr_sensors_.size();i++)
+  {
+    sensors::ContactSensorPtr fsr = (boost::dynamic_pointer_cast<sensors::ContactSensor>(sensors::SensorManager::Instance()->GetSensor(fsr_sensors_[i]->name())));
+
+    if(fsr)
+    {
+      fsr->SetActive(true);
+      msgs::Contacts contacts = fsr->GetContacts();
+      math::Vector3 force = math::Vector3::Zero;
+      for(int j=0;j<contacts.contact_size();j++)
+      {
+        int k=0;
+        for(int k=0;k<contacts.contact(j).position_size();k++)
+        {
+          msgs::Vector3d v = contacts.contact(j).wrench(k).body_1_wrench().force();
+          force += math::Vector3(v.x(), v.y(), v.z());
+        }
+      }
+      naoqi_hal_->sendFSRSensorValue(fsr_sensors_[i], force[2]);
+    }
   }
 
   // Update Sonars
@@ -249,14 +317,7 @@ void GazeboNaoqiControlPlugin::updateSensors()
     sensors::SonarSensorPtr sonar = (boost::dynamic_pointer_cast<sensors::SonarSensor>(sensors::SensorManager::Instance()->GetSensor(sonar_sensors_[i]->name())));
     if(sonar)
     {
-      // sonar->SetActive(true);
-      // std::vector<double> vals;
-      // sonar->GetRanges(vals);
-      double tmp = sonar->GetRange();//sonar->GetRange(0);// 0.0;
-      // for(int j=0;j<vals.size();j++)
-      //   tmp += vals[j];
-      // tmp /= double(vals.size());
-      // ROS_INFO("%s>>%f", sonar_sensors_[i]->name().c_str(), tmp);
+      double tmp = sonar->GetRange();
       naoqi_hal_->sendSonarSensorValue(sonar_sensors_[i], float(tmp));
     }
   }

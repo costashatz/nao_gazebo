@@ -368,7 +368,7 @@
         </noise>
       </imu>
       <always_on>1</always_on>
-      <update_rate>1000</update_rate>
+      <update_rate>30</update_rate>
     </sensor>
   </gazebo>
   <!-- <gazebo reference="LSonar_frame">
@@ -455,6 +455,104 @@
       </sonar>
     </sensor>
   </gazebo>
+
+  <gazebo reference="RFsrRL_frame">
+    <sensor name="RFoot/FSR/RearLeft" type="contact">
+      <always_on>1</always_on>
+      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <contact>
+        <collision>RFsrRL_frame_collision</collision>
+        <topic>RFoot/FSR/RearLeft</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="RFsrRR_frame">
+    <sensor name="RFoot/FSR/RearRight" type="contact">
+      <always_on>1</always_on>
+      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <contact>
+        <collision>RFsrRR_frame_collision</collision>
+        <topic>RFoot/FSR/RearRight</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="RFsrFL_frame">
+    <sensor name="RFoot/FSR/FrontLeft" type="contact">
+      <always_on>1</always_on>
+      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <contact>
+        <collision>RFsrFL_frame_collision</collision>
+        <topic>RFoot/FSR/FrontLeft</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="RFsrFR_frame">
+    <sensor name="RFoot/FSR/FrontRight" type="contact">
+      <always_on>1</always_on>
+      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <contact>
+        <collision>RFsrFR_frame_collision</collision>
+        <topic>RFoot/FSR/FrontRight</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="LFsrRL_frame">
+    <sensor name="LFoot/FSR/RearLeft" type="contact">
+      <always_on>1</always_on>
+      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <contact>
+        <collision>LFsrRL_frame_collision</collision>
+        <topic>LFoot/FSR/RearLeft</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="LFsrRR_frame">
+    <sensor name="LFoot/FSR/RearRight" type="contact">
+      <always_on>1</always_on>
+      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <contact>
+        <collision>LFsrRR_frame_collision</collision>
+        <topic>LFoot/FSR/RearRight</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="LFsrFL_frame">
+    <sensor name="LFoot/FSR/FrontLeft" type="contact">
+      <always_on>1</always_on>
+      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <contact>
+        <collision>LFsrFL_frame_collision</collision>
+        <topic>LFoot/FSR/FrontLeft</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="LFsrFR_frame">
+    <sensor name="LFoot/FSR/FrontRight" type="contact">
+      <always_on>1</always_on>
+      <update_rate>20</update_rate>
+      <visualize>false</visualize>
+      <contact>
+        <collision>LFsrFR_frame_collision</collision>
+        <topic>LFoot/FSR/FrontRight</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
+
   <joint name="HeadYaw" type="revolute">
     <parent link="torso"/>
     <child link="Neck"/>
@@ -1239,12 +1337,24 @@
     <origin rpy="0 0 0" xyz="0.0876 -0.014 -0.0353"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="RFsrRL_frame"/>
-  <joint name="RFoot/FSR/RearLeft_sensor_fixedjoint" type="fixed">
+  <link name="RFsrRL_frame">
+    <inertial> <!-- dummy values for gazebo -->
+              <mass value="0.2e-5" />
+              <origin xyz="0 0 0"/>
+              <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9" />
+          </inertial>
+    <collision name="collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RFoot/FSR/RearLeft_sensor_fixedjoint" type="continuous">
     <parent link="r_ankle"/>
     <child link="RFsrRL_frame"/>
     <origin rpy="0 0 0" xyz="-0.03025 0.0191 -0.04511"/>
-    <axis xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
   <link name="CameraBottom_optical_frame"/>
   <joint name="CameraBottom_optical_frame_joint" type="fixed">
@@ -1252,19 +1362,43 @@
     <child link="CameraBottom_optical_frame"/>
     <origin rpy="-1.57079632679 0 -1.57079632679" xyz="0 0 0"/>
   </joint>
-  <link name="RFsrRR_frame"/>
-  <joint name="RFoot/FSR/RearRight_sensor_fixedjoint" type="fixed">
+  <link name="RFsrRR_frame">
+    <inertial> <!-- dummy values for gazebo -->
+              <mass value="0.2e-5" />
+              <origin xyz="0 0 0"/>
+              <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9" />
+          </inertial>
+    <collision name="collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RFoot/FSR/RearRight_sensor_fixedjoint" type="continuous">
     <parent link="r_ankle"/>
     <child link="RFsrRR_frame"/>
     <origin rpy="0 0 0" xyz="-0.02965 -0.0299 -0.04511"/>
-    <axis xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
-  <link name="LFsrFR_frame"/>
-  <joint name="LFoot/FSR/FrontRight_sensor_fixedjoint" type="fixed">
+  <link name="LFsrFR_frame">
+    <inertial> <!-- dummy values for gazebo -->
+              <mass value="0.2e-5" />
+              <origin xyz="0 0 0"/>
+              <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9" />
+          </inertial>
+    <collision name="collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LFoot/FSR/FrontRight_sensor_fixedjoint" type="continuous">
     <parent link="l_ankle"/>
     <child link="LFsrFR_frame"/>
     <origin rpy="0 0 0" xyz="0.07025 -0.0231 -0.04511"/>
-    <axis xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
   <link name="LHandTouchBack_frame"/>
   <joint name="LHand/Touch/Back_sensor_fixedjoint" type="fixed">
@@ -1287,12 +1421,24 @@
     <origin rpy="0 0 0" xyz="0.0876 -0.019 -0.0353"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="RFsrFR_frame"/>
-  <joint name="RFoot/FSR/FrontRight_sensor_fixedjoint" type="fixed">
+  <link name="RFsrFR_frame">
+    <inertial> <!-- dummy values for gazebo -->
+              <mass value="0.2e-5" />
+              <origin xyz="0 0 0"/>
+              <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9" />
+          </inertial>
+    <collision name="collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RFoot/FSR/FrontRight_sensor_fixedjoint" type="continuous">
     <parent link="r_ankle"/>
     <child link="RFsrFR_frame"/>
     <origin rpy="0 0 0" xyz="0.07025 -0.0299 -0.04511"/>
-    <axis xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
   <link name="MicroSurroundLeft_frame"/>
   <joint name="MicroLeft_sensor_fixedjoint" type="fixed">
@@ -1301,12 +1447,24 @@
     <origin rpy="0 0 0" xyz="-0.0195 0.0606 0.0331"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="LFsrRR_frame"/>
-  <joint name="LFoot/FSR/RearRight_sensor_fixedjoint" type="fixed">
+  <link name="LFsrRR_frame">
+    <inertial> <!-- dummy values for gazebo -->
+              <mass value="0.2e-5" />
+              <origin xyz="0 0 0"/>
+              <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9" />
+          </inertial>
+    <collision name="collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LFoot/FSR/RearRight_sensor_fixedjoint" type="continuous">
     <parent link="l_ankle"/>
     <child link="LFsrRR_frame"/>
     <origin rpy="0 0 0" xyz="-0.02965 -0.0191 -0.04511"/>
-    <axis xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
   <link name="HeadTouchFront_frame"/>
   <joint name="Head/Touch/Front_sensor_fixedjoint" type="fixed">
@@ -1350,12 +1508,24 @@
     <origin rpy="3.14159 -1.5708 3.14159" xyz="0.038 0 0.025"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="RFsrFL_frame"/>
-  <joint name="RFoot/FSR/FrontLeft_sensor_fixedjoint" type="fixed">
+  <link name="RFsrFL_frame">
+    <inertial> <!-- dummy values for gazebo -->
+              <mass value="0.2e-5" />
+              <origin xyz="0 0 0"/>
+              <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9" />
+          </inertial>
+    <collision name="collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RFoot/FSR/FrontLeft_sensor_fixedjoint" type="continuous">
     <parent link="r_ankle"/>
     <child link="RFsrFL_frame"/>
     <origin rpy="0 0 0" xyz="0.07025 0.0231 -0.04511"/>
-    <axis xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
   <link name="LSonar_frame"/>
   <joint name="Sonar/Left_sensor_fixedjoint" type="fixed">
@@ -1371,19 +1541,43 @@
     <origin rpy="0 0 0" xyz="-0.0195 -0.0606 0.0331"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="LFsrFL_frame"/>
-  <joint name="LFoot/FSR/FrontLeft_sensor_fixedjoint" type="fixed">
+  <link name="LFsrFL_frame">
+    <inertial> <!-- dummy values for gazebo -->
+              <mass value="0.2e-5" />
+              <origin xyz="0 0 0"/>
+              <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9" />
+          </inertial>
+    <collision name="collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LFoot/FSR/FrontLeft_sensor_fixedjoint" type="continuous">
     <parent link="l_ankle"/>
     <child link="LFsrFL_frame"/>
     <origin rpy="0 0 0" xyz="0.07025 0.0299 -0.04511"/>
-    <axis xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
-  <link name="LFsrRL_frame"/>
-  <joint name="LFoot/FSR/RearLeft_sensor_fixedjoint" type="fixed">
+  <link name="LFsrRL_frame">
+    <inertial> <!-- dummy values for gazebo -->
+              <mass value="0.2e-5" />
+              <origin xyz="0 0 0"/>
+              <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9" />
+          </inertial>
+    <collision name="collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.001" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LFoot/FSR/RearLeft_sensor_fixedjoint" type="continuous">
     <parent link="l_ankle"/>
     <child link="LFsrRL_frame"/>
     <origin rpy="0 0 0" xyz="-0.03025 0.0299 -0.04511"/>
-    <axis xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
   <link name="RSonar_frame"/>
   <joint name="Sonar/Right_sensor_fixedjoint" type="fixed">
