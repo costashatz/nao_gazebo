@@ -87,6 +87,10 @@ namespace gazebo
 
       std::vector<const Sim::InertialSensor*> inertial_sensors_;
 
+      std::vector<const Sim::FSRSensor*> fsr_sensors_;
+
+      std::vector<const Sim::SonarSensor*> sonar_sensors_;
+
       // ROS Parameters
       std::vector<control_toolbox::Pid> pid_controllers_;
 

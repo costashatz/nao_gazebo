@@ -175,6 +175,10 @@ void GazeboNaoqiControlPlugin::initSensors()
   camera_sensors_ = naoqi_model_->cameraSensors();
 
   inertial_sensors_ = naoqi_model_->inertialSensors();
+
+  fsr_sensors_ = naoqi_model_->fsrSensors();
+
+  sonar_sensors_ = naoqi_model_->sonarSensors();
 }
 
 void GazeboNaoqiControlPlugin::updateSensors()
@@ -187,8 +191,12 @@ void GazeboNaoqiControlPlugin::updateSensors()
     {
       int width = cam->GetImageWidth();
       int height = cam->GetImageHeight();
-      unsigned char* tmp = new unsigned char[width*height];
-      tmp = (unsigned char*)cam->GetImageData();
+      unsigned char* tmp = (unsigned char*)cam->GetImageData();
+      if(!tmp)
+      {
+        ROS_ERROR("NULL image returned from Gazebo camera '%s'", camera_sensors_[i]->name().c_str());
+        continue;
+      }
       int res;
       if(width==80)
         res = Sim::RES_80_60;
@@ -202,17 +210,11 @@ void GazeboNaoqiControlPlugin::updateSensors()
         res = Sim::RES_1280_960;
       else
         res = Sim::RES_UNKNOWN;
-      // int* buffer = new int[width*height];
-      // naoqi_hal_->cameraBufferSize(camera_sensors_[i], buffer, &width, &height);
+
       int r = naoqi_hal_->cameraResolution(camera_sensors_[i]);
       if(r!=res)
       {
-        ROS_ERROR("Mismatch in dimensions: %d vs %d", res, r);
-        continue;
-      }
-      if(!tmp)
-      {
-        ROS_ERROR("NULL image");
+        ROS_ERROR("Mismatch in dimensions when sending image to camera '%s': %d vs %d", camera_sensors_[i]->name().c_str(), res, r);
         continue;
       }
       naoqi_hal_->sendCameraSensorValue(camera_sensors_[i], tmp, (Sim::CameraResolution)res, Sim::COL_SPACE_RGB);
@@ -235,10 +237,28 @@ void GazeboNaoqiControlPlugin::updateSensors()
     vals.push_back(acc[0]);
     vals.push_back(acc[1]);
     vals.push_back(acc[2]);
-    vals.push_back(gyro.GetPitch());
     vals.push_back(gyro.GetRoll());
+    vals.push_back(gyro.GetPitch());
 
     naoqi_hal_->sendInertialSensorValues(inertial_sensors_[0], vals);
+  }
+
+  // Update Sonars
+  for(int i=0;i<sonar_sensors_.size();i++)
+  {
+    sensors::SonarSensorPtr sonar = (boost::dynamic_pointer_cast<sensors::SonarSensor>(sensors::SensorManager::Instance()->GetSensor(sonar_sensors_[i]->name())));
+    if(sonar)
+    {
+      // sonar->SetActive(true);
+      // std::vector<double> vals;
+      // sonar->GetRanges(vals);
+      double tmp = sonar->GetRange();//sonar->GetRange(0);// 0.0;
+      // for(int j=0;j<vals.size();j++)
+      //   tmp += vals[j];
+      // tmp /= double(vals.size());
+      // ROS_INFO("%s>>%f", sonar_sensors_[i]->name().c_str(), tmp);
+      naoqi_hal_->sendSonarSensorValue(sonar_sensors_[i], float(tmp));
+    }
   }
 }
 
@@ -286,8 +306,8 @@ void GazeboNaoqiControlPlugin::writeSim(ros::Time time, ros::Duration period)
       continue;
     }
     double angle = naoqi_hal_->fetchAngleActuatorValue(naoqi_model_->angleActuator(joints_names_[i]));
-    if(joints_names_[i]=="RHipYawPitch")
-      angle = naoqi_hal_->fetchAngleActuatorValue(naoqi_model_->angleActuator("LHipYawPitch"));
+    // if(joints_names_[i]=="RHipYawPitch")
+    //   angle = naoqi_hal_->fetchAngleActuatorValue(naoqi_model_->angleActuator("LHipYawPitch"));
     if(angle!=angle)
     {
       angle = naoqi_model_->angleActuator(joints_names_[i])->startValue();
