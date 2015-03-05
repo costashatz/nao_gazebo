@@ -32,9 +32,8 @@ roslaunch gazebo_naoqi_control nao_gazebo.launch
 This will open up Gazebo with NAO model loaded and simulation paused! You need to open Choregraphe (or any other driver) to give commands to NAO as you would give to a real robot.
 
 **BE CAREFUL:**
-```
+
 NAO at simulation start up is stiffened off. You need to connect to Choreographe and enable stiffness (wake up the robot), before the robot falls down. DO NOT enable stiffness with the simulation paused. It will cause NAOqi to be stalled and no further commands can be issued!
-```
 
 ###Visualize modified model/urdf
 ```sh
@@ -72,9 +71,10 @@ Notes/Limitations
 -----------------
 * Tutorials will become available as soon as possible.
 * Cameras, IMU, sonars and FSRs integration is completed, but in beta/testing stage.
+* **Fingers/Hand joints are not simulated yet..**
 * *Integration for LED, IR, Bumper, Tactile and Audio hardware is not available and is not on my agenda*. So, **feel free to contribute in that direction**.
 * I have tested the plugin for V40 and V50 robot models! Using it with older versions should work, but isn't tested!
-* NAO cannot walk!! NAOqi produces the following error:
+* **NAO cannot walk!! NAOqi produces the following error:**
 ```sh
 [ERROR] ALMotion.ALWalkComMPC :xCreateCopConstraintInFootStep:0 ERROR in compute of CopConstraint
 [WARN ] ALMotion.alwalktorsoheight :xComputeDesiredTorsoHeight:0 Left Leg max leg length: compute torso height failed.
@@ -84,9 +84,11 @@ Notes/Limitations
 
 Future Work
 ------------
+* **Integrate Fingers/Hand joints.**
 * Investigate if we can bind simulated NAOqi's time with Gazebo's simulated time.
 * Enable stiffness by default when simulation is started.
 * Integration of more sensors.
+* **PID values need tuning!!!**
 * .....
 
 License
