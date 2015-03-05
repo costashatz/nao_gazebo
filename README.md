@@ -4,7 +4,7 @@
  
   - Supports **all versions and body types of NAO**.
   - **Written purely in C++**.
-  - **Coupled with official ROS NAO packages**
+  - **Standalone ROS package**
 
 
 Version
@@ -19,7 +19,7 @@ nao_gazebo requires several packages to be installed in order to work properly:
 
 * [ROS] - ROS >= **Hydro**
 * [ROS Control] - **Version >=0.6.0** [control_toolbox should be installed]
-* [Gazebo] - **Version >= 2.2.5**
+* [Gazebo] - **Version 2.2.5** - *Should work on newer versions but haven't tested it*
 
 Basic Usage
 --------------
@@ -66,6 +66,8 @@ Classic gazebo model plugin insertion.. See example in **models/model.xacro**. I
     </plugin>
   </gazebo>
 ```
+
+**NOTE that sensor names must be as they are in nao.xacro file..**
 
 Notes/Limitations
 -----------------

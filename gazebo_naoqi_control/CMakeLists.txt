@@ -42,5 +42,4 @@ catkin_package(
     roscpp 
     gazebo_ros
     control_toolbox
-    nao_gazebo_plugin
 )

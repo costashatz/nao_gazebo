@@ -34,6 +34,6 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
   <param name="use_gui" value="$(arg gui)"/>
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 
-  <arg name="config_file" value="$(find nao_description)/config/urdf.rviz"/>
+  <arg name="config_file" value="$(find gazebo_naoqi_control)/config/urdf.rviz"/>
   <node name="$(anon rviz)" pkg="rviz" type="rviz" respawn="false" output="screen" args="-d $(arg config_file)" />
 </launch>

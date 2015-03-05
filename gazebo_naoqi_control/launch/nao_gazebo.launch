@@ -30,9 +30,9 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
   </include>
 
   <!-- Load PID values for joints -->
-  <rosparam file="$(find nao_gazebo_plugin)/config/gazebo_ros_control_params.yaml" command="load"/>
+  <rosparam file="$(find gazebo_naoqi_control)/config/gazebo_ros_control_params.yaml" command="load"/>
 
   <!-- Spawn NAO into Gazebo -->
-  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x -0.5 -y 1 -z 0.35 -model nao" /> 
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x -0.5 -y 1 -z 0.33 -model nao" /> 
 
 </launch>
