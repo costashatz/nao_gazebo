@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2014, Konstantinos Chatzilygeroudis
+Copyright (c) 2015, Konstantinos Chatzilygeroudis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -39,17 +39,15 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 #include <gazebo/sensors/sensors.hh>
 
 // ros_control
-#include <gazebo_ros_control/robot_hw_sim.h>
-#include <transmission_interface/transmission_parser.h>
 #include <control_toolbox/pid.h>
 
 // NAOqi includes
-#include <qi/os.hpp>
 #include <alnaosim/alnaosim.h>
 #include <alnaosim/alnaosim_camera_definitions.h>
 #include <alrobotmodel/alrobotmodel.h>
 #include <alsimutils/sim_launcher.h>
 
+// General Includes
 #include <vector>
 
 namespace gazebo
@@ -63,20 +61,20 @@ namespace gazebo
       void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
       void Update();
 
+    private:
       void readSim(ros::Time time, ros::Duration period);
       void writeSim(ros::Time time, ros::Duration period);
 
       void initSensors();
       void updateSensors();
 
-    private:
+    protected:
       // NAOqi Parameters
       Sim::SimLauncher* naoqi_sim_launcher_;
       Sim::Model* naoqi_model_;
       Sim::HALInterface* naoqi_hal_;
-      std::string naoqi_path_, naoqi_sim_path_, naoqi_model_type_;
-      std::string robot_namespace_;
-      int naoqi_port_;
+
+      // NAOqi Joint Actuators/Sensors
       std::vector<const Sim::Joint*> joints_;
 
       std::vector<const Sim::AngleSensor*> angle_sensors_;
@@ -111,6 +109,10 @@ namespace gazebo
       ros::Time last_update_sim_time_ros_, last_write_sim_time_ros_;
 
       std::vector<std::string> joints_names_;
+
+      std::string naoqi_path_, naoqi_sim_path_, naoqi_model_type_;
+      std::string robot_namespace_;
+      int naoqi_port_;
 
   };
 }

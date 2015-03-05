@@ -5,7 +5,7 @@ project(gazebo_naoqi_control)
 # Tell CMake where to find "FindNAOqiSIM.cmake"
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Tell Program where to find NAOqi bin
+# Tell Program where to find NAOqi/NAOqiSIM bin
 add_definitions(-DNAOQI_SDK="$ENV{AL_DIR}")
 add_definitions(-DNAOQI_SIM_SDK="$ENV{AL_SIM_DIR}")
 
@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   control_toolbox
 )
 
+# Load NAOqi dependencies
 find_package(NAOqiSIM REQUIRED COMPONENTS 
 	alnaosim 
 	alsimutils
@@ -41,4 +42,5 @@ catkin_package(
     roscpp 
     gazebo_ros
     control_toolbox
+    nao_gazebo_plugin
 )

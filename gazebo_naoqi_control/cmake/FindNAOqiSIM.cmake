@@ -35,6 +35,8 @@ set(NAOqi_COMPONENTS
     althread
     alvision
     alproxies
+    qi
+    qitype
     alnaosim
     alsimutils
     alrobotmodel)

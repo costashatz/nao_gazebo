@@ -1,5 +1,5 @@
 /**
-Copyright (c) 2014, Konstantinos Chatzilygeroudis
+Copyright (c) 2015, Konstantinos Chatzilygeroudis
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -20,23 +20,29 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT
 OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 
+// Includes
 #include <gazebo_naoqi_control/gazebo_naoqi_control_plugin.h>
 #include <angles/angles.h>
+#include <alerror/alerror.h>
 
 using namespace gazebo;
 
 GazeboNaoqiControlPlugin::GazeboNaoqiControlPlugin()
 {
+  // Create NAOqi simulation launcher
   naoqi_sim_launcher_ = new Sim::SimLauncher();
 
+  // Get paths from CMake
   naoqi_path_ = NAOQI_SDK;
   naoqi_sim_path_ = NAOQI_SIM_SDK;
 }
 
 GazeboNaoqiControlPlugin::~GazeboNaoqiControlPlugin()
 {
+  // Disconnect from Gazebo Update Loop
   event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
 
+  // Delete Simulation Objects if necessary
   if(naoqi_sim_launcher_)
     delete naoqi_sim_launcher_;
   if(naoqi_model_)
@@ -69,7 +75,6 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
 
   // Get the Gazebo simulation period
   ros::Duration gazebo_period(world_->GetPhysicsEngine()->GetMaxStepSize());
-  // world_->GetPhysicsEngine()->SetGravity(gazebo::math::Vector3(0,0,0));
 
   // Check for robot namespace
   robot_namespace_ = "/";
@@ -120,15 +125,18 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   // Load NAOqi model and start simulated NAOqi
   try
   {
+    // Get Model from Simulation SDK dir
     naoqi_model_ = new Sim::Model(naoqi_sim_path_+"share/alrobotmodel/models/"+naoqi_model_type_+".xml");
+    // Create HAL interface
     naoqi_hal_ = new Sim::HALInterface(naoqi_model_, naoqi_port_);
+    // Launch Simulation
     if(!naoqi_sim_launcher_->launch(naoqi_model_, naoqi_port_, naoqi_path_))
     {
       ROS_ERROR("Failed to Launch HAL or NAOqi. GazeboNaoqiControlPlugin could not be loaded.");
       return;
     }
   }
-  catch(const std::exception& e)
+  catch(const AL::ALError& e)
   {
     ROS_ERROR("Exception while launching HAL or NAOqi. GazeboNaoqiControlPlugin could not be loaded.\n\t%s", e.what());
     return;
@@ -140,6 +148,7 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   angle_actuators_ = naoqi_model_->angleActuators();
 
   joints_ = naoqi_model_->joints();
+  // Create Gazebo Joints
   for(unsigned int i=0;i<angle_actuators_.size();i++)
   {
     std::string name = angle_actuators_[i]->name();
@@ -159,6 +168,7 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
     }
   }
 
+  // Initialize Sensors
   initSensors();
 
 
@@ -184,7 +194,7 @@ void GazeboNaoqiControlPlugin::initSensors()
     }
   }
 
-  // Activate IMU
+  // Activate IMU - I assume only 1 IMU (TO-DO: Check cases where more exist)
   inertial_sensors_ = naoqi_model_->inertialSensors();
   if(inertial_sensors_.size()>=1)
   {
@@ -230,10 +240,11 @@ void GazeboNaoqiControlPlugin::updateSensors()
     {
       int width = cam->GetImageWidth();
       int height = cam->GetImageHeight();
+      // Get Image from Gazebo
       unsigned char* tmp = (unsigned char*)cam->GetImageData();
       if(!tmp)
       {
-        ROS_ERROR("NULL image returned from Gazebo camera '%s'", camera_sensors_[i]->name().c_str());
+        ROS_WARN("NULL image returned from Gazebo camera '%s'", camera_sensors_[i]->name().c_str());
         continue;
       }
       int res;
@@ -250,12 +261,14 @@ void GazeboNaoqiControlPlugin::updateSensors()
       else
         res = Sim::RES_UNKNOWN;
 
+      // TO-DO: Update Gazebo camera to match NAOqi's resolution
       int r = naoqi_hal_->cameraResolution(camera_sensors_[i]);
       if(r!=res)
       {
-        ROS_ERROR("Mismatch in dimensions when sending image to camera '%s': %d vs %d", camera_sensors_[i]->name().c_str(), res, r);
+        ROS_WARN("Mismatch in dimensions when sending image to camera '%s': %d vs %d", camera_sensors_[i]->name().c_str(), res, r);
         continue;
       }
+      // Send image to NAOqi
       naoqi_hal_->sendCameraSensorValue(camera_sensors_[i], tmp, (Sim::CameraResolution)res, Sim::COL_SPACE_RGB);
     }
   }
@@ -267,6 +280,7 @@ void GazeboNaoqiControlPlugin::updateSensors()
 
     if(imu)
     {
+      // Get IMU data from Gazebo
       math::Vector3 gyro = imu->GetAngularVelocity();
       math::Vector3 acc = imu->GetLinearAcceleration();
       math::Quaternion orient = imu->GetOrientation();
@@ -276,12 +290,17 @@ void GazeboNaoqiControlPlugin::updateSensors()
 
       vals.push_back(orient.GetRoll());
       vals.push_back(orient.GetPitch());
+      // if(naoqi_model_type_ == "NAOH25V50") //Should be working for V50 - it doesn't
+      //   vals.push_back(orient.GetYaw());
       vals.push_back(acc[0]);
       vals.push_back(acc[1]);
       vals.push_back(-acc[2]);
       vals.push_back(gyro[0]);
       vals.push_back(gyro[1]);
+      // if(naoqi_model_type_ == "NAOH25V50") //Should be working for V50 - it doesn't
+      //   vals.push_back(gyro[2]);
 
+      // Send IMU data to NAOqi
       naoqi_hal_->sendInertialSensorValues(inertial_sensors_[0], vals);
     }
   }
@@ -295,7 +314,7 @@ void GazeboNaoqiControlPlugin::updateSensors()
 
     if(fsr)
     {
-      fsr->SetActive(true);
+      // Get FSR data from Gazebo
       msgs::Contacts contacts = fsr->GetContacts();
       math::Vector3 force = math::Vector3::Zero;
       for(int j=0;j<contacts.contact_size();j++)
@@ -303,11 +322,20 @@ void GazeboNaoqiControlPlugin::updateSensors()
         int k=0;
         for(int k=0;k<contacts.contact(j).position_size();k++)
         {
+          // TO-DO: Needs checking
           msgs::Vector3d v = contacts.contact(j).wrench(k).body_1_wrench().force();
+          force += math::Vector3(v.x(), v.y(), v.z());
+          v = contacts.contact(j).wrench(k).body_2_wrench().force();
           force += math::Vector3(v.x(), v.y(), v.z());
         }
       }
-      naoqi_hal_->sendFSRSensorValue(fsr_sensors_[i], force[2]);
+      double g = gravity[2];
+      if(g<0)
+        g = -g;
+      else if(g==0.0)
+        g = 1.0;
+      // Send FSR data to NAOqi
+      naoqi_hal_->sendFSRSensorValue(fsr_sensors_[i], force.GetLength()/g);
     }
   }
 
@@ -317,7 +345,9 @@ void GazeboNaoqiControlPlugin::updateSensors()
     sensors::SonarSensorPtr sonar = (boost::dynamic_pointer_cast<sensors::SonarSensor>(sensors::SensorManager::Instance()->GetSensor(sonar_sensors_[i]->name())));
     if(sonar)
     {
+      // Get Sonar range from Gazebo
       double tmp = sonar->GetRange();
+      // Send Sonar range to NAOqi
       naoqi_hal_->sendSonarSensorValue(sonar_sensors_[i], float(tmp));
     }
   }
@@ -325,7 +355,9 @@ void GazeboNaoqiControlPlugin::updateSensors()
 
 void GazeboNaoqiControlPlugin::Update()
 {
+  // Update sensors
   updateSensors();
+
   // Get the simulation time and period
   gazebo::common::Time gz_time_now = world_->GetSimTime();
   ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
@@ -347,28 +379,27 @@ void GazeboNaoqiControlPlugin::Update()
 
 void GazeboNaoqiControlPlugin::readSim(ros::Time time, ros::Duration period)
 {
+  // Read joint states from Gazebo and send them to NAOqi
   for(unsigned int i=0;i<gazebo_joints_.size();i++)
   {
     double angle = gazebo_joints_[i]->GetAngle(0).Radian();
     if(angle!=angle)
       continue;
-    if(naoqi_model_->angleSensor(joints_names_[i])) //some are passive joints
+    if(naoqi_model_->angleSensor(joints_names_[i])) //sometimes we cannot get the handle
       naoqi_hal_->sendAngleSensorValue(naoqi_model_->angleSensor(joints_names_[i]), angle);
   }
 }
 
 void GazeboNaoqiControlPlugin::writeSim(ros::Time time, ros::Duration period)
 {
+  // Get actuator commands from NAOqi and write them in Gazebo
+  // TO-DO: Implement LED, Sonar and other commads
   for(unsigned int i=0;i<gazebo_joints_.size();i++)
   {
-    if(!naoqi_model_->angleActuator(joints_names_[i]))
-    {
-       //some are passive joints
+    if(!naoqi_model_->angleActuator(joints_names_[i])) //sometimes we cannot get the handle
       continue;
-    }
+
     double angle = naoqi_hal_->fetchAngleActuatorValue(naoqi_model_->angleActuator(joints_names_[i]));
-    // if(joints_names_[i]=="RHipYawPitch")
-    //   angle = naoqi_hal_->fetchAngleActuatorValue(naoqi_model_->angleActuator("LHipYawPitch"));
     if(angle!=angle)
     {
       angle = naoqi_model_->angleActuator(joints_names_[i])->startValue();
