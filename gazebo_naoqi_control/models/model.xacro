@@ -3,8 +3,8 @@
 
   <!-- Specify properties needed -->
   <xacro:property name="robotNamespace" value="/nao_dcm"/>
-  <!-- <xacro:property name="controlPeriod" value="0.001"/> -->
-  <xacro:property name="gazeboControlPeriod" value="true"/>
+  <xacro:property name="controlPeriod" value="0.01"/> <!-- 100Hz control -->
+  <xacro:property name="gazeboControlPeriod" value="false"/>
   <xacro:property name="port" value="9559"/>
   <xacro:property name="modelType" value="NAOH25V40"/>
 

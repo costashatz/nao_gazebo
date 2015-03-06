@@ -130,7 +130,7 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
     // Create HAL interface
     naoqi_hal_ = new Sim::HALInterface(naoqi_model_, naoqi_port_);
     // Launch Simulation
-    if(!naoqi_sim_launcher_->launch(naoqi_model_, naoqi_port_, naoqi_path_))
+    if(!naoqi_sim_launcher_->launch(naoqi_model_, naoqi_port_, naoqi_sim_path_))
     {
       ROS_ERROR("Failed to Launch HAL or NAOqi. GazeboNaoqiControlPlugin could not be loaded.");
       return;
@@ -191,6 +191,7 @@ void GazeboNaoqiControlPlugin::initSensors()
     if(cam)
     {
       cam->SetActive(true);
+      gazebo_cameras_.push_back(cam);
     }
   }
 
@@ -203,6 +204,7 @@ void GazeboNaoqiControlPlugin::initSensors()
     if(imu)
     {
       imu->SetActive(true);
+      gazebo_imu_.push_back(imu);
     }
   }
 
@@ -215,6 +217,7 @@ void GazeboNaoqiControlPlugin::initSensors()
     if(fsr)
     {
       fsr->SetActive(true);
+      gazebo_fsrs_.push_back(fsr);
     }
   }
 
@@ -226,6 +229,7 @@ void GazeboNaoqiControlPlugin::initSensors()
     if(sonar)
     {
       sonar->SetActive(true);
+      gazebo_sonars_.push_back(sonar);
     }
   }
 }
@@ -233,131 +237,110 @@ void GazeboNaoqiControlPlugin::initSensors()
 void GazeboNaoqiControlPlugin::updateSensors()
 {
   // Update Cameras
-  for(int i=0;i<camera_sensors_.size();i++)
+  for(int i=0;i<gazebo_cameras_.size();i++)
   {
-    sensors::CameraSensorPtr cam = (boost::dynamic_pointer_cast<sensors::CameraSensor>(sensors::SensorManager::Instance()->GetSensor(camera_sensors_[i]->name())));
-    if(cam)
+    int width = gazebo_cameras_[i]->GetImageWidth();
+    int height = gazebo_cameras_[i]->GetImageHeight();
+    // Get Image from Gazebo
+    unsigned char* tmp = (unsigned char*)gazebo_cameras_[i]->GetImageData();
+    if(!tmp)
     {
-      int width = cam->GetImageWidth();
-      int height = cam->GetImageHeight();
-      // Get Image from Gazebo
-      unsigned char* tmp = (unsigned char*)cam->GetImageData();
-      if(!tmp)
-      {
-        ROS_WARN("NULL image returned from Gazebo camera '%s'", camera_sensors_[i]->name().c_str());
-        continue;
-      }
-      int res;
-      if(width==80)
-        res = Sim::RES_80_60;
-      else if(width==160)
-        res = Sim::RES_160_120;
-      else if(width==320)
-        res = Sim::RES_320_240;
-      else if(width==640)
-        res = Sim::RES_640_480;
-      else if(width==1280)
-        res = Sim::RES_1280_960;
-      else
-        res = Sim::RES_UNKNOWN;
-
-      // TO-DO: Update Gazebo camera to match NAOqi's resolution
-      int r = naoqi_hal_->cameraResolution(camera_sensors_[i]);
-      if(r!=res)
-      {
-        ROS_WARN("Mismatch in dimensions when sending image to camera '%s': %d vs %d", camera_sensors_[i]->name().c_str(), res, r);
-        continue;
-      }
-      // Send image to NAOqi
-      naoqi_hal_->sendCameraSensorValue(camera_sensors_[i], tmp, (Sim::CameraResolution)res, Sim::COL_SPACE_RGB);
+      ROS_WARN("NULL image returned from Gazebo camera '%s'", camera_sensors_[i]->name().c_str());
+      continue;
     }
+    int res;
+    if(width==80)
+      res = Sim::RES_80_60;
+    else if(width==160)
+      res = Sim::RES_160_120;
+    else if(width==320)
+      res = Sim::RES_320_240;
+    else if(width==640)
+      res = Sim::RES_640_480;
+    else if(width==1280)
+      res = Sim::RES_1280_960;
+    else
+      res = Sim::RES_UNKNOWN;
+
+    // TO-DO: Update Gazebo camera to match NAOqi's resolution
+    int r = naoqi_hal_->cameraResolution(camera_sensors_[i]);
+    if(r!=res)
+    {
+      ROS_WARN("Mismatch in dimensions when sending image to camera '%s': %d vs %d", camera_sensors_[i]->name().c_str(), res, r);
+      continue;
+    }
+    // Send image to NAOqi
+    naoqi_hal_->sendCameraSensorValue(camera_sensors_[i], tmp, (Sim::CameraResolution)res, Sim::COL_SPACE_RGB);
   }
 
   //Update IMU
-  if(inertial_sensors_.size()>=1)
+  if(gazebo_imu_.size()>=1)
   {
-    sensors::ImuSensorPtr imu = (boost::dynamic_pointer_cast<sensors::ImuSensor>(sensors::SensorManager::Instance()->GetSensor("imu")));
+    // Get IMU data from Gazebo
+    math::Vector3 gyro = gazebo_imu_[0]->GetAngularVelocity();
+    math::Vector3 acc = gazebo_imu_[0]->GetLinearAcceleration();
+    math::Quaternion orient = gazebo_imu_[0]->GetOrientation();
 
-    if(imu)
-    {
-      // Get IMU data from Gazebo
-      math::Vector3 gyro = imu->GetAngularVelocity();
-      math::Vector3 acc = imu->GetLinearAcceleration();
-      math::Quaternion orient = imu->GetOrientation();
+    std::vector<float> vals;
+    // AngleX, AngleY, [AngleZ - not in V40], AccX, AccY, AccZ, GyroX, GyroY, [GyroZ - not in V40]
 
-      std::vector<float> vals;
-      // AngleX, AngleY, [AngleZ - not in V40], AccX, AccY, AccZ, GyroX, GyroY, [GyroZ - not in V40]
+    vals.push_back(orient.GetRoll());
+    vals.push_back(orient.GetPitch());
+    // if(naoqi_model_type_ == "NAOH25V50") //Should be working for V50 - it doesn't
+    //   vals.push_back(orient.GetYaw());
+    vals.push_back(acc[0]);
+    vals.push_back(acc[1]);
+    vals.push_back(-acc[2]);
+    vals.push_back(gyro[0]);
+    vals.push_back(gyro[1]);
+    // if(naoqi_model_type_ == "NAOH25V50") //Should be working for V50 - it doesn't
+    //   vals.push_back(gyro[2]);
 
-      vals.push_back(orient.GetRoll());
-      vals.push_back(orient.GetPitch());
-      // if(naoqi_model_type_ == "NAOH25V50") //Should be working for V50 - it doesn't
-      //   vals.push_back(orient.GetYaw());
-      vals.push_back(acc[0]);
-      vals.push_back(acc[1]);
-      vals.push_back(-acc[2]);
-      vals.push_back(gyro[0]);
-      vals.push_back(gyro[1]);
-      // if(naoqi_model_type_ == "NAOH25V50") //Should be working for V50 - it doesn't
-      //   vals.push_back(gyro[2]);
-
-      // Send IMU data to NAOqi
-      naoqi_hal_->sendInertialSensorValues(inertial_sensors_[0], vals);
-    }
+    // Send IMU data to NAOqi
+    naoqi_hal_->sendInertialSensorValues(inertial_sensors_[0], vals);
   }
 
   math::Vector3 gravity = world_->GetPhysicsEngine()->GetGravity();
 
   // Update FSRs
-  for(int i=0;i<fsr_sensors_.size();i++)
+  for(int i=0;i<gazebo_fsrs_.size();i++)
   {
-    sensors::ContactSensorPtr fsr = (boost::dynamic_pointer_cast<sensors::ContactSensor>(sensors::SensorManager::Instance()->GetSensor(fsr_sensors_[i]->name())));
-
-    if(fsr)
+    // Get FSR data from Gazebo
+    msgs::Contacts contacts = gazebo_fsrs_[i]->GetContacts();
+    math::Vector3 force = math::Vector3::Zero;
+    for(int j=0;j<contacts.contact_size();j++)
     {
-      // Get FSR data from Gazebo
-      msgs::Contacts contacts = fsr->GetContacts();
-      math::Vector3 force = math::Vector3::Zero;
-      for(int j=0;j<contacts.contact_size();j++)
+      int k=0;
+      for(int k=0;k<contacts.contact(j).position_size();k++)
       {
-        int k=0;
-        for(int k=0;k<contacts.contact(j).position_size();k++)
-        {
-          // TO-DO: Needs checking
-          msgs::Vector3d v = contacts.contact(j).wrench(k).body_1_wrench().force();
-          force += math::Vector3(v.x(), v.y(), v.z());
-          v = contacts.contact(j).wrench(k).body_2_wrench().force();
-          force += math::Vector3(v.x(), v.y(), v.z());
-        }
+        // TO-DO: Needs checking
+        msgs::Vector3d v = contacts.contact(j).wrench(k).body_1_wrench().force();
+        force += math::Vector3(v.x(), v.y(), v.z());
+        v = contacts.contact(j).wrench(k).body_2_wrench().force();
+        force += math::Vector3(v.x(), v.y(), v.z());
       }
-      double g = gravity[2];
-      if(g<0)
-        g = -g;
-      else if(g==0.0)
-        g = 1.0;
-      // Send FSR data to NAOqi
-      naoqi_hal_->sendFSRSensorValue(fsr_sensors_[i], force.GetLength()/g);
     }
+    double g = gravity[2];
+    if(g<0)
+      g = -g;
+    else if(g==0.0)
+      g = 1.0;
+    // Send FSR data to NAOqi
+    naoqi_hal_->sendFSRSensorValue(fsr_sensors_[i], force.GetLength()/g);
   }
 
   // Update Sonars
-  for(int i=0;i<sonar_sensors_.size();i++)
+  for(int i=0;i<gazebo_sonars_.size();i++)
   {
-    sensors::SonarSensorPtr sonar = (boost::dynamic_pointer_cast<sensors::SonarSensor>(sensors::SensorManager::Instance()->GetSensor(sonar_sensors_[i]->name())));
-    if(sonar)
-    {
-      // Get Sonar range from Gazebo
-      double tmp = sonar->GetRange();
-      // Send Sonar range to NAOqi
-      naoqi_hal_->sendSonarSensorValue(sonar_sensors_[i], float(tmp));
-    }
+    // Get Sonar range from Gazebo
+    double tmp = gazebo_sonars_[i]->GetRange();
+    // Send Sonar range to NAOqi
+    naoqi_hal_->sendSonarSensorValue(sonar_sensors_[i], float(tmp));
   }
 }
 
 void GazeboNaoqiControlPlugin::Update()
 {
-  // Update sensors
-  updateSensors();
-
   // Get the simulation time and period
   gazebo::common::Time gz_time_now = world_->GetSimTime();
   ros::Time sim_time_ros(gz_time_now.sec, gz_time_now.nsec);
@@ -370,6 +353,9 @@ void GazeboNaoqiControlPlugin::Update()
 
     // Update the robot simulation with the state of the gazebo model
     readSim(sim_time_ros, sim_period);
+
+    // Update sensors
+    updateSensors();
   }
 
   // Update the gazebo model with commands from NAOqi

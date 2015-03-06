@@ -94,6 +94,10 @@ namespace gazebo
 
       // Gazebo joints/sensors
       std::vector<physics::JointPtr> gazebo_joints_;
+      std::vector<sensors::CameraSensorPtr> gazebo_cameras_;
+      std::vector<sensors::ImuSensorPtr> gazebo_imu_;
+      std::vector<sensors::ContactSensorPtr> gazebo_fsrs_;
+      std::vector<sensors::SonarSensorPtr> gazebo_sonars_;
 
       // Pointer to the model
       physics::ModelPtr model_;
