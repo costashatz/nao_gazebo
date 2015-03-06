@@ -21,6 +21,15 @@ nao_gazebo requires several packages to be installed in order to work properly:
 * [ROS Control] - **Version >=0.6.0** [control_toolbox should be installed]
 * [Gazebo] - **Version 2.2.5** - *Should work on newer versions but haven't tested it*
 
+Building/Compiling
+------------------
+
+You need to have either environmetal variable **AL_SIM_DIR** or CMake option **NAOqi_SIM_DIR** pointing to the NAOqi Simulator SDK path.
+
+Also, you need to have either environmetal variable **AL_DIR** or CMake option **NAOqi_DIR** pointing to the NAOqi Simulator SDK path.
+
+Check *cmake/FindNAOqiSIM.cmake* for more details.
+
 Basic Usage
 --------------
 
