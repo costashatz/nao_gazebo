@@ -387,12 +387,12 @@
       <update_rate>30</update_rate>
     </sensor>
   </gazebo>
-  <!-- <gazebo reference="LSonar_frame">
+  <gazebo reference="LSonar_frame">
     <sensor name="Sonar/Left" type="ray">
       <pose>0 0 0 0 0 0</pose>
       <always_on>1</always_on>
       <update_rate>20</update_rate>
-      <visualize>true</visualize>
+      <visualize>false</visualize>
       <ray>
         <scan>
           <horizontal>
@@ -411,8 +411,13 @@
         <range>
           <min>0.025</min>
           <max>2.55</max>
-          <resolution>0.01</resolution>
+          <resolution>1</resolution>
         </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.05</stddev>
+        </noise>
       </ray>
     </sensor>
   </gazebo>
@@ -421,7 +426,7 @@
       <pose>0 0 0 0 0 0</pose>
       <always_on>1</always_on>
       <update_rate>20</update_rate>
-      <visualize>true</visualize>
+      <visualize>false</visualize>
       <ray>
         <scan>
           <horizontal>
@@ -440,35 +445,14 @@
         <range>
           <min>0.025</min>
           <max>2.55</max>
-          <resolution>0.01</resolution>
+          <resolution>1</resolution>
         </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.05</stddev>
+        </noise>
       </ray>
-    </sensor>
-  </gazebo> -->
-  <gazebo reference="LSonar_frame">
-    <sensor name="Sonar/Left" type="sonar">
-      <always_on>1</always_on>
-      <update_rate>20</update_rate>
-      <visualize>false</visualize>
-      <sonar>
-        <min>0.025</min>
-        <max>2.55</max>
-        <!-- NEEDS TWEAKING -->
-        <radius>0.25</radius>
-      </sonar>
-    </sensor>
-  </gazebo>
-  <gazebo reference="RSonar_frame">
-    <sensor name="Sonar/Right" type="sonar">
-      <always_on>1</always_on>
-      <update_rate>20</update_rate>
-      <visualize>false</visualize>
-      <sonar>
-        <min>0.025</min>
-        <max>2.55</max>
-        <!-- NEEDS TWEAKING -->
-        <radius>0.25</radius>
-      </sonar>
     </sensor>
   </gazebo>
 
@@ -648,12 +632,12 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/HeadYaw_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision> -->
+    </collision>
   </link>
   <joint name="HeadPitch" type="revolute">
     <parent link="Neck"/>
@@ -679,14 +663,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/HeadPitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0 0 0.058" rpy="1.57 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0 0 0.058" rpy="1.57 0 0"/>
       <geometry>
           <cylinder radius="0.04" length="0.14"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="gaze_joint" type="fixed">
@@ -718,12 +702,12 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LHipYawPitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision> -->
+    </collision>
   </link>
   <joint name="LHipRoll" type="revolute">
     <parent link="LPelvis"/>
@@ -748,12 +732,12 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LHipRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision> -->
+    </collision>
   </link>
   <joint name="LHipPitch" type="revolute">
     <parent link="LHip"/>
@@ -779,14 +763,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LHipPitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0 0 -0.05" rpy="0 0 0"/>
       <geometry>
           <cylinder radius="0.015" length="0.1"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="LKneePitch" type="revolute">
@@ -813,14 +797,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LKneePitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0 0 -0.05" rpy="0 0 0"/>
       <geometry>
           <cylinder radius="0.015" length="0.1"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="LAnklePitch" type="revolute">
@@ -846,12 +830,12 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LAnklePitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision> -->
+    </collision>
   </link>
   <joint name="LAnkleRoll" type="revolute">
     <parent link="LAnklePitch_link"/>
@@ -877,14 +861,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LAnkleRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0.02 0.001 -0.038" rpy="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0.02 0.001 -0.038" rpy="0 0 0"/>
       <geometry>
           <box size="0.14 0.09 0.012"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="LLeg_effector_fixedjoint" type="fixed">
@@ -918,12 +902,12 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RHipYawPitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision> -->
+    </collision>
   </link>
   <joint name="RHipRoll" type="revolute">
     <parent link="RPelvis"/>
@@ -948,12 +932,12 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RHipRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision> -->
+    </collision>
   </link>
   <joint name="RHipPitch" type="revolute">
     <parent link="RHip"/>
@@ -979,14 +963,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RHipPitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0 0 -0.05" rpy="0 0 0"/>
       <geometry>
           <cylinder radius="0.015" length="0.1"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="RKneePitch" type="revolute">
@@ -1013,14 +997,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RKneePitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0 0 -0.05" rpy="0 0 0"/>
       <geometry>
           <cylinder radius="0.015" length="0.1"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="RAnklePitch" type="revolute">
@@ -1046,12 +1030,12 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RAnklePitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision> -->
+    </collision>
   </link>
   <joint name="RAnkleRoll" type="revolute">
     <parent link="RAnklePitch_link"/>
@@ -1077,14 +1061,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RAnkleRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0.02 -0.001 -0.038" rpy="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0.02 -0.001 -0.038" rpy="0 0 0"/>
       <geometry>
           <box size="0.14 0.09 0.012"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="RLeg_effector_fixedjoint" type="fixed">
@@ -1114,15 +1098,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- one cylinder spanning over HipOffsetZ and NeckOffsetZ -->
-      <origin xyz="0 0 0.02075" rpy="0 0 0"/>
+      <!-- <origin xyz="0 0 0.02075" rpy="0 0 0"/>
       <geometry>
           <cylinder radius="0.015" length="0.2115"/>
-      </geometry>
-      <!-- <geometry>
+      </geometry> -->
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/Torso_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
+      <origin rpy="0 0 0" xyz="0 0 0"/>
     </collision>
   </link>
   <joint name="LShoulderPitch" type="revolute">
@@ -1148,12 +1131,12 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LShoulderPitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision> -->
+    </collision>
   </link>
   <joint name="LShoulderRoll" type="revolute">
     <parent link="LShoulder"/>
@@ -1179,14 +1162,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LShoulderRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0.045 0 0" rpy="1.57079632679 0 1.57079632679"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0.045 0 0" rpy="1.57079632679 0 1.57079632679"/>
       <geometry>
           <cylinder radius="0.015" length="0.09"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="LElbowYaw" type="revolute">
@@ -1231,14 +1214,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LElbowRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0.025325 0 0" rpy="1.57079632679 0 1.57079632679"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0.025325 0 0" rpy="1.57079632679 0 1.57079632679"/>
       <geometry>
           <cylinder radius="0.015" length="0.05065"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="LWristYaw" type="revolute">
@@ -1265,14 +1248,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LWristYaw_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0.029 0 0" rpy="1.57079632679 0 1.57079632679"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0.029 0 0" rpy="1.57079632679 0 1.57079632679"/>
       <geometry>
           <cylinder radius="0.015" length="0.058"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="LHand" type="revolute">
@@ -1315,12 +1298,12 @@
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RShoulderPitch_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-    </collision> -->
+    </collision>
   </link>
   <joint name="RShoulderRoll" type="revolute">
     <parent link="RShoulder"/>
@@ -1346,14 +1329,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RShoulderRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0.045 0 0" rpy="1.57079632679 0 1.57079632679"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0.045 0 0" rpy="1.57079632679 0 1.57079632679"/>
       <geometry>
           <cylinder radius="0.015" length="0.09"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="RElbowYaw" type="revolute">
@@ -1398,14 +1381,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RElbowRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0.025325 0 0" rpy="1.57079632679 0 1.57079632679"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0.025325 0 0" rpy="1.57079632679 0 1.57079632679"/>
       <geometry>
           <cylinder radius="0.015" length="0.05065"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="RWristYaw" type="revolute">
@@ -1432,14 +1415,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <!-- <geometry>
+      <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RWristYaw_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/> -->
-      <origin xyz="0.029 0 0" rpy="1.57079632679 0 1.57079632679"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <!-- <origin xyz="0.029 0 0" rpy="1.57079632679 0 1.57079632679"/>
       <geometry>
           <cylinder radius="0.015" length="0.058"/>
-      </geometry>
+      </geometry> -->
     </collision>
   </link>
   <joint name="RHand" type="revolute">
@@ -1660,7 +1643,8 @@
   <joint name="Sonar/Left_sensor_fixedjoint" type="fixed">
     <parent link="torso"/>
     <child link="LSonar_frame"/>
-    <origin rpy="-0.00478508 -1.52714663 0.392441" xyz="0.00558253 0.0192068 0.0623853"/>
+    <!-- <origin rpy="-0.00478508 -1.52714663 0.392441" xyz="0.00558253 0.0192068 0.0623853"/> -->
+    <origin rpy="-0.00478508 0.0436497 0.392441" xyz="0.00558253 0.0192068 0.0623853"/>
     <axis xyz="0 0 0"/>
   </joint>
   <link name="MicroSurroundRight_frame"/>
@@ -1712,7 +1696,8 @@
   <joint name="Sonar/Right_sensor_fixedjoint" type="fixed">
     <parent link="torso"/>
     <child link="RSonar_frame"/>
-    <origin rpy="0.00478508 -1.52714663 -0.392441" xyz="0.00558253 -0.0192068 0.0623853"/>
+    <!-- <origin rpy="0.00478508 -1.52714663 -0.392441" xyz="0.00558253 -0.0192068 0.0623853"/> -->
+    <origin rpy="0.00478508 0.0436497 -0.392441" xyz="0.00558253 -0.0192068 0.0623853"/>
     <axis xyz="0 0 0"/>
   </joint>
   <link name="RHandTouchLeft_frame"/>

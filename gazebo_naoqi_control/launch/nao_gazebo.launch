@@ -22,7 +22,7 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 <!-- Launch file to run Gazebo NAOqi Control Plugin -->
 <launch>
   <!-- Load the URDF Model -->
-  <param name="robot_description" command="$(find xacro)/xacro.py $(find gazebo_naoqi_control)/models/model.xacro" />
+  <param name="gazebo_robot_description" command="$(find xacro)/xacro.py $(find gazebo_naoqi_control)/models/model.xacro" />
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="paused" value="true"/>
@@ -33,6 +33,6 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
   <rosparam file="$(find gazebo_naoqi_control)/config/gazebo_ros_control_params.yaml" command="load"/>
 
   <!-- Spawn NAO into Gazebo -->
-  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -x -0.5 -y 1 -z 0.33 -model nao" /> 
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param gazebo_robot_description -urdf -x -0.5 -y 1 -z 0.33 -model nao" /> 
 
 </launch>

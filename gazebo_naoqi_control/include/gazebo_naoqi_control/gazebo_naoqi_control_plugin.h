@@ -62,7 +62,7 @@ namespace gazebo
       void Update();
 
     private:
-      void readSim(ros::Time time, ros::Duration period);
+      void readSim();
       void writeSim(ros::Time time, ros::Duration period);
 
       void initSensors();
@@ -97,7 +97,7 @@ namespace gazebo
       std::vector<sensors::CameraSensorPtr> gazebo_cameras_;
       std::vector<sensors::ImuSensorPtr> gazebo_imu_;
       std::vector<sensors::ContactSensorPtr> gazebo_fsrs_;
-      std::vector<sensors::SonarSensorPtr> gazebo_sonars_;
+      std::vector<sensors::RaySensorPtr> gazebo_sonars_;
 
       // Pointer to the model
       physics::ModelPtr model_;

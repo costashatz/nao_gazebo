@@ -225,7 +225,7 @@ void GazeboNaoqiControlPlugin::initSensors()
   sonar_sensors_ = naoqi_model_->sonarSensors();
   for(int i=0;i<sonar_sensors_.size();i++)
   {
-    sensors::SonarSensorPtr sonar = (boost::dynamic_pointer_cast<sensors::SonarSensor>(sensors::SensorManager::Instance()->GetSensor(sonar_sensors_[i]->name())));
+    sensors::RaySensorPtr sonar = (boost::dynamic_pointer_cast<sensors::RaySensor>(sensors::SensorManager::Instance()->GetSensor(sonar_sensors_[i]->name())));
     if(sonar)
     {
       sonar->SetActive(true);
@@ -333,9 +333,15 @@ void GazeboNaoqiControlPlugin::updateSensors()
   for(int i=0;i<gazebo_sonars_.size();i++)
   {
     // Get Sonar range from Gazebo
-    double tmp = gazebo_sonars_[i]->GetRange();
+    std::vector<double> tmp;
+    gazebo_sonars_[i]->GetRanges(tmp);
+
+    double val = 0.0;
+    for(int j=0;j<tmp.size();j++)
+      val += tmp[j];
+    val /= tmp.size();
     // Send Sonar range to NAOqi
-    naoqi_hal_->sendSonarSensorValue(sonar_sensors_[i], float(tmp));
+    naoqi_hal_->sendSonarSensorValue(sonar_sensors_[i], float(val));
   }
 }
 
@@ -352,10 +358,12 @@ void GazeboNaoqiControlPlugin::Update()
     last_update_sim_time_ros_ = sim_time_ros;
 
     // Update the robot simulation with the state of the gazebo model
-    readSim(sim_time_ros, sim_period);
+    boost::thread t1(&GazeboNaoqiControlPlugin::readSim, this);
+    // Update sensors in different thread
+    boost::thread t2(&GazeboNaoqiControlPlugin::updateSensors, this);
 
-    // Update sensors
-    updateSensors();
+    t1.join();
+    t2.join();
   }
 
   // Update the gazebo model with commands from NAOqi
@@ -363,7 +371,7 @@ void GazeboNaoqiControlPlugin::Update()
   last_write_sim_time_ros_ = sim_time_ros;
 }
 
-void GazeboNaoqiControlPlugin::readSim(ros::Time time, ros::Duration period)
+void GazeboNaoqiControlPlugin::readSim()
 {
   // Read joint states from Gazebo and send them to NAOqi
   for(unsigned int i=0;i<gazebo_joints_.size();i++)
