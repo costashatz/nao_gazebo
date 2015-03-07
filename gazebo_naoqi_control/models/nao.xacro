@@ -1458,7 +1458,7 @@
     <collision name="collision">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.01 0.01 0.001" />
+        <box size="0.01 0.01 0.005" />
       </geometry>
     </collision>
   </link>
@@ -1483,7 +1483,7 @@
     <collision name="collision">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.01 0.01 0.001" />
+        <box size="0.01 0.01 0.005" />
       </geometry>
     </collision>
   </link>
@@ -1502,7 +1502,7 @@
     <collision name="collision">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.01 0.01 0.001" />
+        <box size="0.01 0.01 0.005" />
       </geometry>
     </collision>
   </link>
@@ -1542,7 +1542,7 @@
     <collision name="collision">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.01 0.01 0.001" />
+        <box size="0.01 0.01 0.005" />
       </geometry>
     </collision>
   </link>
@@ -1568,7 +1568,7 @@
     <collision name="collision">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.01 0.01 0.001" />
+        <box size="0.01 0.01 0.005" />
       </geometry>
     </collision>
   </link>
@@ -1629,7 +1629,7 @@
     <collision name="collision">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.01 0.01 0.001" />
+        <box size="0.01 0.01 0.005" />
       </geometry>
     </collision>
   </link>
@@ -1644,7 +1644,8 @@
     <parent link="torso"/>
     <child link="LSonar_frame"/>
     <!-- <origin rpy="-0.00478508 -1.52714663 0.392441" xyz="0.00558253 0.0192068 0.0623853"/> -->
-    <origin rpy="-0.00478508 0.0436497 0.392441" xyz="0.00558253 0.0192068 0.0623853"/>
+    <!-- <origin rpy="-0.00478508 0.0436497 0.392441" xyz="0.00558253 0.0192068 0.0623853"/> -->
+    <origin xyz="0.0477 0.0416 0.0509" rpy="0 0.2618 0.4363"/>
     <axis xyz="0 0 0"/>
   </joint>
   <link name="MicroSurroundRight_frame"/>
@@ -1663,7 +1664,7 @@
     <collision name="collision">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.01 0.01 0.001" />
+        <box size="0.01 0.01 0.005" />
       </geometry>
     </collision>
   </link>
@@ -1682,7 +1683,7 @@
     <collision name="collision">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.01 0.01 0.001" />
+        <box size="0.01 0.01 0.005" />
       </geometry>
     </collision>
   </link>
@@ -1697,7 +1698,8 @@
     <parent link="torso"/>
     <child link="RSonar_frame"/>
     <!-- <origin rpy="0.00478508 -1.52714663 -0.392441" xyz="0.00558253 -0.0192068 0.0623853"/> -->
-    <origin rpy="0.00478508 0.0436497 -0.392441" xyz="0.00558253 -0.0192068 0.0623853"/>
+    <!-- <origin rpy="0.00478508 0.0436497 -0.392441" xyz="0.00558253 -0.0192068 0.0623853"/> -->
+    <origin xyz="0.0477 -0.0416 0.0509" rpy="0 0.2618 -0.4363"/>
     <axis xyz="0 0 0"/>
   </joint>
   <link name="RHandTouchLeft_frame"/>

@@ -66,7 +66,14 @@ namespace gazebo
       void writeSim(ros::Time time, ros::Duration period);
 
       void initSensors();
-      void updateSensors();
+
+      void onCameraUpdate(const Sim::CameraSensor* _camera, const unsigned char *_image, unsigned int _width, unsigned int _height, unsigned int _depth, const std::string &_format);
+
+      void onImuUpdate(sensors::ImuSensorPtr _sensor);
+
+      void onSonarUpdate(sensors::RaySensorPtr _gazebo_sonar, const Sim::SonarSensor* _sonar);
+
+      void onFSRUpdate(sensors::ContactSensorPtr _gazebo_fsr, const Sim::FSRSensor* _fsr);
 
     protected:
       // NAOqi Parameters
@@ -81,23 +88,30 @@ namespace gazebo
 
       std::vector<const Sim::AngleActuator*> angle_actuators_;
 
-      std::vector<const Sim::CameraSensor*> camera_sensors_;
-
-      std::vector<const Sim::InertialSensor*> inertial_sensors_;
-
-      std::vector<const Sim::FSRSensor*> fsr_sensors_;
-
-      std::vector<const Sim::SonarSensor*> sonar_sensors_;
+      const Sim::CameraSensor* top_camera_;
+      const Sim::CameraSensor* bottom_camera_;
+      const Sim::InertialSensor* inertial_sensor_;
+      const Sim::SonarSensor* left_sonar_;
+      const Sim::SonarSensor* right_sonar_;
+      const Sim::FSRSensor* LFoot_front_left_;
+      const Sim::FSRSensor* LFoot_front_right_;
+      const Sim::FSRSensor* LFoot_rear_left_;
+      const Sim::FSRSensor* LFoot_rear_right_;
+      const Sim::FSRSensor* RFoot_front_left_;
+      const Sim::FSRSensor* RFoot_front_right_;
+      const Sim::FSRSensor* RFoot_rear_left_;
+      const Sim::FSRSensor* RFoot_rear_right_;
 
       // ROS Parameters
       std::vector<control_toolbox::Pid> pid_controllers_;
 
       // Gazebo joints/sensors
       std::vector<physics::JointPtr> gazebo_joints_;
-      std::vector<sensors::CameraSensorPtr> gazebo_cameras_;
-      std::vector<sensors::ImuSensorPtr> gazebo_imu_;
-      std::vector<sensors::ContactSensorPtr> gazebo_fsrs_;
-      std::vector<sensors::RaySensorPtr> gazebo_sonars_;
+      sensors::CameraSensorPtr gazebo_top_camera_, gazebo_bottom_camera_;
+      sensors::ImuSensorPtr gazebo_imu_;
+      sensors::ContactSensorPtr gazebo_lfoot_front_left_, gazebo_lfoot_front_right_, gazebo_lfoot_rear_left_, gazebo_lfoot_rear_right_;
+      sensors::ContactSensorPtr gazebo_rfoot_front_left_, gazebo_rfoot_front_right_, gazebo_rfoot_rear_left_, gazebo_rfoot_rear_right_;
+      sensors::RaySensorPtr gazebo_left_sonar_, gazebo_right_sonar_;
 
       // Pointer to the model
       physics::ModelPtr model_;
@@ -108,9 +122,16 @@ namespace gazebo
       // Pointer to the update event connection
       event::ConnectionPtr update_connection_;
 
+      event::ConnectionPtr new_top_camera_frame_connection_, new_bottom_camera_frame_connection_;
+      event::ConnectionPtr imu_update_connection_;
+      event::ConnectionPtr left_sonar_update_connection_, right_sonar_update_connection_;
+      event::ConnectionPtr fsr_lfl_update_connection_, fsr_lfr_update_connection_, fsr_lrl_update_connection_, fsr_lrr_update_connection_;
+      event::ConnectionPtr fsr_rfl_update_connection_, fsr_rfr_update_connection_, fsr_rrl_update_connection_, fsr_rrr_update_connection_;
+
       // Gazebo/ROS Parameters
       ros::Duration control_period_;
       ros::Time last_update_sim_time_ros_, last_write_sim_time_ros_;
+      math::Vector3 gravity_;
 
       std::vector<std::string> joints_names_;
 
