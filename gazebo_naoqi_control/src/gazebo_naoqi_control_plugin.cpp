@@ -26,7 +26,8 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 #include <alerror/alerror.h>
 #include <gazebo/rendering/Camera.hh>
 
-using namespace gazebo;
+namespace gazebo
+{
 
 GazeboNaoqiControlPlugin::GazeboNaoqiControlPlugin()
 {
@@ -500,3 +501,5 @@ void GazeboNaoqiControlPlugin::writeSim(ros::Time time, ros::Duration period)
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboNaoqiControlPlugin);
+
+}
