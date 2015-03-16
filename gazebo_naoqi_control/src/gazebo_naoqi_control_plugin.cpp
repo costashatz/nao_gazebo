@@ -205,6 +205,19 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
     }
   }
 
+  // Initialize actuators
+  for(std::vector<const Sim::AngleActuator*>::const_iterator it =
+      angle_actuators_.begin(); it != angle_actuators_.end(); ++it)
+  {
+    float actuatorPosition = naoqi_hal_->fetchAngleActuatorValue(*it);
+    if(actuatorPosition != actuatorPosition)
+    {
+      actuatorPosition = (*it)->startValue();
+    }
+    const Sim::AngleSensor* sensor = naoqi_model_->angleSensor((*it)->name());
+    naoqi_hal_->sendAngleSensorValue(sensor, actuatorPosition);
+  }
+
   // Initialize Sensors
   initSensors();
 
