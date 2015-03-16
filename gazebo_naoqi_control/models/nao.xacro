@@ -861,14 +861,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <geometry>
+      <!-- <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/LAnkleRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <!-- <origin xyz="0.02 0.001 -0.038" rpy="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/> -->
+      <origin xyz="0.02 0.001 -0.038" rpy="0 0 0"/>
       <geometry>
           <box size="0.14 0.09 0.012"/>
-      </geometry> -->
+      </geometry>
     </collision>
   </link>
   <joint name="LLeg_effector_fixedjoint" type="fixed">
@@ -1061,14 +1061,14 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
     </visual>
     <collision>
-      <geometry>
+      <!-- <geometry>
         <mesh filename="package://nao_meshes/meshes/V40/RAnkleRoll_0.10.stl" scale="0.1 0.1 0.1"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <!-- <origin xyz="0.02 -0.001 -0.038" rpy="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/> -->
+      <origin xyz="0.02 -0.001 -0.038" rpy="0 0 0"/>
       <geometry>
           <box size="0.14 0.09 0.012"/>
-      </geometry> -->
+      </geometry>
     </collision>
   </link>
   <joint name="RLeg_effector_fixedjoint" type="fixed">
