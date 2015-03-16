@@ -85,13 +85,7 @@ Notes/Limitations
 * **Fingers/Hand joints are not simulated yet..**
 * *Integration for LED, IR, Bumper, Tactile and Audio hardware is not available and is not on my agenda*. So, **feel free to contribute in that direction**.
 * I have tested the plugin for V40 and V50 robot models! Using it with older versions should work, but isn't tested!
-* **NAO cannot walk!! NAOqi produces the following error:**
-```sh
-[ERROR] ALMotion.ALWalkComMPC :xCreateCopConstraintInFootStep:0 ERROR in compute of CopConstraint
-[WARN ] ALMotion.alwalktorsoheight :xComputeDesiredTorsoHeight:0 Left Leg max leg length: compute torso height failed.
-[WARN ] motion.almotion :computePreview:0 compute torso height. Error QP.
-[WARN ] ALMotion.ALBalancerWalk :xSetWalkAngles:0 Cartesian motion is infeasible for one leg. cycleNumber: 1493
-```
+* **NAO now walks!!** Thanks to @jlanca ..
 
 Future Work
 ------------
