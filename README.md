@@ -24,9 +24,9 @@ nao_gazebo requires several packages to be installed in order to work properly:
 Building/Compiling
 ------------------
 
-You need to have either environmetal variable **AL_SIM_DIR** or CMake option **NAOqi_SIM_DIR** pointing to the C++ NAOqi Simulator SDK path.
+You need to have either environmental variable **AL_SIM_DIR** or CMake option **NAOqi_SIM_DIR** pointing to the C++ NAOqi Simulator SDK path.
 
-Also, you need to have either environmetal variable **AL_DIR** or CMake option **NAOqi_DIR** pointing to the C++ NAOqi SDK path.
+Also, you need to have either environmental variable **AL_DIR** or CMake option **NAOqi_DIR** pointing to the C++ NAOqi SDK path.
 
 Check *cmake/FindNAOqiSIM.cmake* for more details.
 
