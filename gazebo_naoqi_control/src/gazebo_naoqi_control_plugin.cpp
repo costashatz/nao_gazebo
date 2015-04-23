@@ -25,6 +25,7 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISE
 #include <angles/angles.h>
 #include <alerror/alerror.h>
 #include <gazebo/rendering/Camera.hh>
+#include <boost/filesystem.hpp>
 
 namespace gazebo
 {
@@ -162,8 +163,10 @@ void GazeboNaoqiControlPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _
   // Load NAOqi model and start simulated NAOqi
   try
   {
+  	boost::filesystem::path naoqi_sim_path = naoqi_sim_path_;
+  	naoqi_sim_path /= "share/alrobotmodel/models/"+naoqi_model_type_+".xml";
     // Get Model from Simulation SDK dir
-    naoqi_model_ = new Sim::Model(naoqi_sim_path_+"share/alrobotmodel/models/"+naoqi_model_type_+".xml");
+    naoqi_model_ = new Sim::Model(naoqi_sim_path.string());
     // Create HAL interface
     naoqi_hal_ = new Sim::HALInterface(naoqi_model_, naoqi_port_);
     // Launch Simulation
