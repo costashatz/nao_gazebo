@@ -20,6 +20,7 @@ nao_gazebo requires several packages to be installed in order to work properly:
 * [ROS] - ROS >= **Hydro**
 * [ROS Control] - **Version >=0.6.0** [control_toolbox should be installed]
 * [Gazebo] - **Version 2.2.5** - *Should work on newer versions but haven't tested it*
+* [NAO meshes] - For visualization purposes
 
 Building/Compiling
 ------------------
@@ -107,3 +108,4 @@ Copyright (c) 2014-2015, **Konstantinos Chatzilygeroudis**
 [ros]: http://www.ros.org
 [gazebo]: http://gazebosim.org
 [ros control]: http://wiki.ros.org/ros_control
+[nao meshes]: https://github.com/ros-naoqi/nao_meshes
