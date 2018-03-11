@@ -1,6 +1,6 @@
-#nao_gazebo
+# nao_gazebo
  
-##ROS Packages to simulate Aldebaran's NAO Humanoid in Gazebo through NAOqi Simulator SDK
+## ROS Packages to simulate Aldebaran's NAO Humanoid in Gazebo through NAOqi Simulator SDK
  
   - Supports **all versions and body types of NAO**.
   - **Written purely in C++**.
@@ -34,7 +34,7 @@ Check *cmake/FindNAOqiSIM.cmake* for more details.
 Basic Usage
 --------------
 
-###Bringup nao_gazebo
+### Bringup nao_gazebo
 ```sh
 roslaunch gazebo_naoqi_control nao_gazebo.launch
 ```
@@ -45,7 +45,7 @@ This will open up Gazebo with NAO model loaded and simulation paused! You need t
 
 NAO at simulation start up is stiffened off. You need to connect to Choreographe and enable stiffness (wake up the robot), before the robot falls down. DO NOT enable stiffness with the simulation paused. It will cause NAOqi to be stalled and no further commands can be issued!
 
-###Visualize modified model/urdf
+### Visualize modified model/urdf
 ```sh
 roslaunch gazebo_naoqi_control display.launch
 ```
@@ -56,13 +56,13 @@ URDF Modifications
 ------------------
 Please feel free to check *models/nao.xacro* file for modifying for example sensor properties...
 
-###Plugin SDF elements
+### Plugin SDF elements
 * **robotNamespace** - provides the robot namespace
 * **controlPeriod** - control period for reading/writing sensor/actuator values
 * **port** - port to initialize NAOqi
 * **modelType** - type of model to load. Check the path in simulator SDK: *${SIMULATOR_SDK}/share/alrobotmodel/models/*
 
-###Load plugin in URDF
+### Load plugin in URDF
 
 Classic gazebo model plugin insertion.. See example in **models/model.xacro**. In practice create a file like **model.xacro** and tune the xacro properties.
 
